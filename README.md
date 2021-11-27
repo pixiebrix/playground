@@ -2,7 +2,9 @@
 
 > Playground for testing extensions and web customization.
 
-Base demo page available at: https://pixiebrix.github.io/playground/example/
+Base demo page available at: [https://pixiebrix.github.io/playground/example/](https://pixiebrix.github.io/playground/example/)
+
+Repo available at [https://github.com/pixiebrix/playground](https://github.com/pixiebrix/playground)
 
 ## Usage suggestions
 

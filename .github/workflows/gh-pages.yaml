@@ -19,11 +19,12 @@ jobs:
         run: yarn && yarn run build
 
       - name: Create public distribution
+        # Copy the directory without the directory name, see: https://unix.stackexchange.com/a/180987
         run: |
           mkdir public
-          mkdir public/react-example && cp -R example public/example
-          mkdir public/react-example && cp -R react-example/build public/react-example
-          
+          mkdir public/example && cp --recursive example/. public/example
+          mkdir public/react-example && cp --recursive react-example/build/. public/react-example
+
       - uses: actions/upload-artifact@v2
         with:
           name: playground-site

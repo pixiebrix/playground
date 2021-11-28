@@ -2,9 +2,9 @@
 
 > Playground for testing extensions and web customization.
 
-Demo page available: 
+Example pages available: 
 * [Bootstrap 5 swatch](https://pixiebrix.github.io/playground/example/)
-* [Create React App](https://pixiebrix.github.io/playground/example/)
+* [Create React App](https://pixiebrix.github.io/playground/react-example/): React 16.12.0, React Bootstrap 1.6.0
 
 Repo available at [https://github.com/pixiebrix/playground](https://github.com/pixiebrix/playground)
 

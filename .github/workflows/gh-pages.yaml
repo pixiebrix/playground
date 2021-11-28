@@ -21,9 +21,9 @@ jobs:
       - name: Create public distribution
         run: |
           mkdir public
-          cp -R react-example/build public
-          cp -R example public
-
+          mkdir public/react-example && cp -R example public/example
+          mkdir public/react-example && cp -R react-example/build public/react-example
+          
       - uses: actions/upload-artifact@v2
         with:
           name: playground-site

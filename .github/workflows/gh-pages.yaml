@@ -22,7 +22,7 @@ jobs:
         run: |
           mkdir public
           cp -R react-example/build public
-          cp -R example/build public
+          cp -R example public
 
       - uses: actions/upload-artifact@v2
         with:

@@ -1,0 +1,41 @@
+name: CI/CD
+
+on: push
+
+env:
+  # Creates and uploads sourcemaps to Rollbar, and save the built extension as an artifact
+  PUBLIC_RELEASE: ${{ github.ref == 'refs/heads/main' }}
+
+jobs:
+  build-stage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '14'
+      - name: Build react-example
+        working-directory: react-example
+        run: yarn && yarn run build
+
+      - name: Create public distribution
+        # Copy the directory without the directory name, see: https://unix.stackexchange.com/a/180987
+        run: |
+          mkdir public
+          mkdir public/example && cp --recursive example/. public/example
+          mkdir public/react-example && cp --recursive react-example/build/. public/react-example
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: playground-site
+          path: public
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ env.PUBLIC_RELEASE }}
+        with:
+          # Note that the GITHUB_TOKEN is NOT a personal access token. A GitHub Actions runner automatically creates a
+          # GITHUB_TOKEN secret to authenticate in your workflow. So, you can start to deploy immediately without
+          # any configuration.
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public

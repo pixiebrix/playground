@@ -16,6 +16,8 @@ jobs:
           node-version: '14'
       - name: Build react-example
         working-directory: react-example
+        env:
+          PUBLIC_URL: "/playground/react-example"
         run: yarn && yarn run build
 
       - name: Create public distribution

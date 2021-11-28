@@ -31,7 +31,7 @@ jobs:
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
-        if: ${{ PUBLIC_RELEASE }}
+        if: ${{ env.PUBLIC_RELEASE }}
         with:
           # Note that the GITHUB_TOKEN is NOT a personal access token. A GitHub Actions runner automatically creates a
           # GITHUB_TOKEN secret to authenticate in your workflow. So, you can start to deploy immediately without

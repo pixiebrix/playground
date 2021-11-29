@@ -46,10 +46,11 @@ jobs:
       ##########
 
       - uses: actions/upload-artifact@v2
-        if: ${{ ! fromJSON(env.PUBLIC_RELEASE)}}
+        if: ${{ ! fromJSON(env.PUBLIC_RELEASE) }}
         with:
           name: playground-site
           path: public
+          exclusions: "*.map"
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3

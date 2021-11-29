@@ -27,6 +27,11 @@ jobs:
           mkdir public/example && cp --recursive example/. public/example
           mkdir public/react-example && cp --recursive react-example/build/. public/react-example
 
+      - uses: actions/upload-artifact@v2
+        with:
+          name: playground-site
+          path: public
+
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
         if: ${{ env.PUBLIC_RELEASE }}

@@ -1,6 +1,7 @@
 import React, {useCallback} from "react";
 import Page from "./Page";
 import {Button} from "react-bootstrap"
+import {Link} from "react-router-dom";
 
 const ApprovePage = () => {
 
@@ -20,8 +21,8 @@ const ApprovePage = () => {
       </div>
       <div>
         <ul className="mt-2">
-          <li><a href="/table" target="blank">Open transaction table</a></li>
-          <li><a href="/modals" target="blank">Open other page</a></li>
+          <li><Link to="/table" target="blank">Open transaction table</Link></li>
+          <li><Link to="/modals" target="blank">Open other page</Link></li>
         </ul>
       </div>
     </Page>

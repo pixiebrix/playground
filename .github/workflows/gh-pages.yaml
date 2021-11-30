@@ -3,36 +3,58 @@ name: CI/CD
 on: push
 
 env:
-  # Creates and uploads sourcemaps to Rollbar, and save the built extension as an artifact
   PUBLIC_RELEASE: ${{ github.ref == 'refs/heads/main' }}
 
 jobs:
-  build-stage:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
         with:
           node-version: '14'
+
+      #########################
+      # Prepare public folder #
+      #########################
+
+      - name: Create public distribution
+        run: |
+          mkdir -p public
+          mv example public
+        # Duplicate the line above to add more folders
+
+
+      #########
+      # Build # Each build should be self-contained
+      #########
+
+      - name: Build markdown files
+        run: |
+          npx markdown-styles@3.2.0 --layout github --input README.md --output public
+          mv public/README.html public/index.html
+
       - name: Build react-example
         working-directory: react-example
         env:
           PUBLIC_URL: "/playground/react-example"
-        run: yarn && yarn run build
+        run: yarn && yarn run build && mv build ../public/react-example
 
-      - name: Create public distribution
-        # Copy the directory without the directory name, see: https://unix.stackexchange.com/a/180987
-        run: |
-          mkdir public
-          mkdir public/example && cp --recursive example/. public/example
-          mkdir public/react-example && cp --recursive react-example/build/. public/react-example
+
+      ##########
+      # Deploy #
+      ##########
+
+      - uses: actions/upload-artifact@v2
+        if: ${{ ! fromJSON(env.PUBLIC_RELEASE) }}
+        with:
+          name: playground-site
+          path: public
+          exclusions: "*.map"
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
-        if: ${{ env.PUBLIC_RELEASE }}
+        if: ${{ fromJSON(env.PUBLIC_RELEASE)}}
         with:
-          # Note that the GITHUB_TOKEN is NOT a personal access token. A GitHub Actions runner automatically creates a
-          # GITHUB_TOKEN secret to authenticate in your workflow. So, you can start to deploy immediately without
-          # any configuration.
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public

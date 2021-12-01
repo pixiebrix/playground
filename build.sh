@@ -3,7 +3,7 @@
 set -e # exit when any command fails
 
 for DIR in */ ; do
-	if [ "$DIR" = "public" ]
+	if [ "$DIR" = "public/" ]
 	then
 		continue
 	elif [ -f "$DIR/build.sh" ]

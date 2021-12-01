@@ -4,10 +4,8 @@
 
 Example pages available:
 
-- [bootstrap-5](https://pbx.vercel.app/bootstrap-5/): Bootstrap 5 swatch
-- [create-react-app](https://pbx.vercel.app/create-react-app/): React 16.12.0, React Bootstrap 1.6.0
-
-Repo available at [https://github.com/pixiebrix/playground](https://github.com/pixiebrix/playground)
+- [/bootstrap-5](https://pbx.vercel.app/bootstrap-5/): Bootstrap 5 swatch
+- [/create-react-app](https://pbx.vercel.app/create-react-app/): React 16.12.0, React Bootstrap 1.6.0
 
 ## Contribute
 

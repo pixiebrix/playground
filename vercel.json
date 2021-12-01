@@ -4,8 +4,8 @@
   },
   "rewrites": [
     {
-      "source": "/react-example/(.*)",
-      "destination": "/react-example/index.html"
+      "source": "/create-react-app/(.*)",
+      "destination": "/create-react-app/index.html"
     },
     {
       "source": "/:path*",

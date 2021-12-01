@@ -3,8 +3,8 @@
 # exit when any command fails
 set -e
 
-# /react-example
-cd react-example
+# /create-react-app
+cd create-react-app
 yarn
-PUBLIC_URL=/react-example/ yarn run build
-mv build ../public/react-example
+PUBLIC_URL=/create-react-app/ yarn run build
+mv build ../public/create-react-app

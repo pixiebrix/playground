@@ -11,31 +11,36 @@ Repo available at [https://github.com/pixiebrix/playground](https://github.com/p
 
 ## Contribute
 
-Each folder is its own standalone project so we never have dependency conflicts. The only shared part is `build.sh`, where you might have to add build steps.
+Each folder is its own standalone project so we never have dependency conflicts.
 
 _Some projects might be used for testing, it's often better to create a new project._
 
-### Adding a static page/project
+### Adding a static project
 
-1. Create folder at the root of the repo, with at least an `index.html` file (like `/my-demo/index.html`)
+1. Create a folder at the root of the repo, with at least an `index.html` file (like `/my-demo/index.html`)
 1. Access it at `https://pbx.vercel.app/my-demo/`
 
-### Adding a page/project with a build
+### Adding a project with a build
 
-1. Create folder at the root of the repo with the source files, like `/my-demo/`
+1. Create a folder at the root of the repo with the source files, like `/my-demo/`
    - Treat this folder as a self-contained project with its own `package.json` file
 1. Add its _install_ and _build_ steps in its own `build.sh` file (like `/my-demo/build.sh`)
-   - One of the step must create a directory under `/public`, like `public/my-demo/index.html`
+
+   - One of the steps must create a directory under `/public`, like `public/my-demo/index.html`
    - Example:
-      ```sh
-      #! /bin/sh
 
-      set -e # exit when any command fails
+     ```sh
+     #! /bin/sh
 
-      yarn
-      PUBLIC_URL=/my-demo/ yarn run build
-      mv build ../public/my-demo
-      ```
+     set -e # exit when any command fails
+
+     yarn
+     PUBLIC_URL=/my-demo/ yarn run build
+
+     # "build" contains the generated code
+     # This command moves its content to the public /my-demo/ folder
+     mv build ../public/my-demo
+     ```
 
 1. Access it at `https://pbx.vercel.app/my-demo/`
    - If you send a PR, you can access a temporary deployment at a custom URL like `pbx-temp-pr.vercel.app/my-demo/`

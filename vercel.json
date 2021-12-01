@@ -3,6 +3,10 @@
     {
       "source": "/react-example/(.*)",
       "destination": "/react-example/index.html"
+    },
+    {
+      "source": "/:path*",
+      "destination": "https://pixiebrix.github.io/playground/:path*"
     }
   ]
 }

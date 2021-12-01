@@ -6,10 +6,6 @@
     {
       "source": "/create-react-app/(.*)",
       "destination": "/create-react-app/index.html"
-    },
-    {
-      "source": "/:path*",
-      "destination": "https://pixiebrix.github.io/playground/:path*"
     }
   ]
 }

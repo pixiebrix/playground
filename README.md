@@ -42,5 +42,6 @@ _Some projects might be used for testing, it's often better to create a new proj
      mv build ../public/my-demo
      ```
 
+1. If your project is a single-page APP (i.e. all paths point to index.html), you'll have to edit `vercel.json` too
 1. Access it at `https://pbx.vercel.app/my-demo/`
    - If you send a PR, you can access a temporary deployment at a custom URL like `pbx-temp-pr.vercel.app/my-demo/`

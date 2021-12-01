@@ -2,19 +2,29 @@
 
 > Playground for testing extensions and web customization.
 
-Example pages available: 
-* [Bootstrap 5 swatch](https://pixiebrix.github.io/playground/example/)
-* [Create React App](https://pixiebrix.github.io/playground/react-example/): React 16.12.0, React Bootstrap 1.6.0
+Example pages available:
+
+- [Bootstrap 5 swatch](https://pbx.vercel.app/example/)
+- [Create React App](https://pbx.vercel.app/react-example/): React 16.12.0, React Bootstrap 1.6.0
 
 Repo available at [https://github.com/pixiebrix/playground](https://github.com/pixiebrix/playground)
 
-## Adding an example page/project
+## Contribute
 
-1. Create a folder at the root of the repo:
-   1. Ensure the public distribution folder contains an index.html file. (See `example/index.html` for reference) 
-2. Add steps to the `.github/workflows/gh-pages.yaml` GitHub actions workflow:
-   1. (As needed) Add a step to build the example project. For builds that produce URLs that are relative to a public URL, provide`/playground/YOUR_FOLDER_NAME/` as the base.
-   2. Add a command to the "Create public distribution" step
-3. Merge the changes into `main`. The GitHub workflow is set up to publish the site on each commit of main (by automatically copying the distribution files over to the `gh-pages` branch)
-4. Access it at `https://pixiebrix.github.io/playground/YOUR_FOLDER_NAME/`
-5. No rules at this point, but be careful about editing previous content (they might be being used in automated tests)
+Each folder is its own standalone project so we never have dependency conflicts. The only shared part is `build.sh`, where you might have to add build steps.
+
+_Some projects might be used for testing, it's often better to create a new project._
+
+### Adding a static page/project
+
+1. Create folder at the root of the repo, with at least an `index.html` file (like `/my-demo/index.html`)
+1. Access it at `https://pbx.vercel.app/my-demo/`
+
+### Adding a page/project with a build
+
+1. Create folder at the root of the repo with the source files, like `/my-demo/`
+   - Treat this folder as a self-contained project with its own `package.json` file
+1. Add its _install_ and _build_ steps in the `build.sh` file at the root of the repo
+   - Follow the instructions in `build.sh` itself
+1. Access it at `https://pbx.vercel.app/my-demo/`
+   - If you send a PR, you can access a temporary deployment at a custom URL like `pbx-temp-pr.vercel.app/my-demo/`

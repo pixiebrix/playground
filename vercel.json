@@ -1,4 +1,5 @@
 {
+  "silent": true,
   "rewrites": [
     {
       "source": "/react-example/(.*)",

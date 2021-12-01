@@ -1,10 +1,31 @@
-#! /bin/sh
+#! /bin/bash
 
-# exit when any command fails
-set -e
+set -e # exit when any command fails
 
-# /react-example
-cd react-example
-yarn
-PUBLIC_URL=/react-example/ yarn run build
-mv build ../public/react-example
+###################################################
+# This script is executed by vercel on deployment #
+###################################################
+
+mkdir -p public
+mv ./-go-to-repo.html public
+
+for DIR in */ ; do
+	if [ "$DIR" = "public/" ]
+	then
+		continue
+	elif [ -f "$DIR/build.sh" ]
+	then (
+		echo "##################"
+		echo "Running /${DIR}build.sh"
+		echo "##################"
+		cd "$DIR"
+		bash ./build.sh
+	)
+	else
+		echo "##################"
+		echo "Moving /$DIR to /public/$DIR unchanged"
+		mkdir -p "public/$DIR"
+		mv "$DIR" public/
+		echo "##################"
+	fi
+done

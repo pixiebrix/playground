@@ -1,16 +1,11 @@
 {
+  "github": {
+    "silent": true
+  },
   "rewrites": [
     {
-      "source": "/react-example/(.*)",
-      "destination": "/react-example/index.html"
-    },
-    {
-      "source": "/:path*",
-      "destination": "https://pixiebrix.github.io/playground/:path*"
-    },
-    {
-      "source": "/",
-      "destination": "https://pixiebrix.github.io/playground/"
+      "source": "/create-react-app/(.*)",
+      "destination": "/create-react-app/index.html"
     }
   ]
 }

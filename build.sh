@@ -2,6 +2,13 @@
 
 set -e # exit when any command fails
 
+###################################################
+# This script is executed by vercel on deployment #
+###################################################
+
+mkdir -p public
+mv ./-go-to-repo.html public
+
 for DIR in */ ; do
 	if [ "$DIR" = "public/" ]
 	then

@@ -1,10 +1,24 @@
-#! /bin/sh
+#! /bin/bash
 
-# exit when any command fails
-set -e
+set -e # exit when any command fails
 
-# /create-react-app
-cd create-react-app
-yarn
-PUBLIC_URL=/create-react-app/ yarn run build
-mv build ../public/create-react-app
+for DIR in */ ; do
+	if [ "$DIR" = "public" ]
+	then
+		continue
+	elif [ -f "$DIR/build.sh" ]
+	then (
+		echo "##################"
+		echo "Running /${DIR}build.sh"
+		echo "##################"
+		cd "$DIR"
+		bash ./build.sh
+	)
+	else
+		echo "##################"
+		echo "Moving /$DIR to /public/$DIR unchanged"
+		mkdir -p "public/$DIR"
+		mv "$DIR" "public/$DIR"
+		echo "##################"
+	fi
+done

@@ -13,5 +13,5 @@ mv example public
 # /react-example
 cd react-example
 yarn
-yarn run build
+PUBLIC_URL=/react-example/ yarn run build
 mv build ../public/react-example

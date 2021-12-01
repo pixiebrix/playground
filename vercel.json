@@ -7,6 +7,10 @@
     {
       "source": "/:path*",
       "destination": "https://pixiebrix.github.io/playground/:path*"
+    },
+    {
+      "source": "/",
+      "destination": "https://pixiebrix.github.io/playground/"
     }
   ]
 }

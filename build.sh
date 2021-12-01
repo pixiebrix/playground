@@ -18,7 +18,7 @@ for DIR in */ ; do
 		echo "##################"
 		echo "Moving /$DIR to /public/$DIR unchanged"
 		mkdir -p "public/$DIR"
-		mv "$DIR" "public/$DIR"
+		mv "$DIR" public/
 		echo "##################"
 	fi
 done

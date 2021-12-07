@@ -28,7 +28,7 @@ for DIR in */ ; do
 		echo "##################"
 		cd "$DIR"
 		touch build.sh
-		cp ../vuebuild.sh build.sh
+		cp ../vuebuild.sh ./build.sh
 		bash ./build.sh
 	)
 	else

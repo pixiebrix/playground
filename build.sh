@@ -21,16 +21,6 @@ for DIR in */ ; do
 		cd "$DIR"
 		bash ./build.sh
 	)
-	elif [ "$DIR" = "vue-element-admin/" ]
-	then(
-		echo "##################"
-		echo "Running /${DIR}build.sh"
-		echo "##################"
-		cd "$DIR"
-		touch build.sh
-		cp ../vuebuild.sh ./build.sh
-		bash ./build.sh
-	)
 	else
 		echo "##################"
 		echo "Moving /$DIR to /public/$DIR unchanged"

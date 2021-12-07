@@ -27,7 +27,7 @@ for DIR in */ ; do
 		echo "Running /${DIR}build.sh"
 		echo "##################"
 		cd "$DIR"
-		touch builds.sh
+		touch build.sh
 		cp ../vuebuild.sh build.sh
 		bash ./build.sh
 	)

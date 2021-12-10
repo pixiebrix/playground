@@ -5,4 +5,4 @@ set -e # exit when any command fails
 cd vue-element-admin
 npm install
 PUBLIC_URL=/vue-element-admin npm run build:prod
-mv -f dist ../public/vue-element-admin
+mv -f dist ../../public/vue-element-admin

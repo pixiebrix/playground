@@ -2,10 +2,11 @@
 
 set -e # exit when any command fails
 
-cd vue-element-admin
+cd repo
 
-cp -R ../vue.config.js vue.config.js
+# Set correct path
+sed -i "s/publicPath: '\/'/publicPath: '\/vue-element-admin\/'/" vue.config.js
 
 npm install
-PUBLIC_URL=/vue-element-admin npm run build:prod
+npm run build:prod
 mv -f dist ../../public/vue-element-admin

@@ -11,5 +11,12 @@
 			"source": "/vue-element-admin/vue-element-admin/(.*)",
 			"destination": "/vue-element-admin/index.html"
 		}
+	],
+	"redirects": [
+		{
+			"source": "/vue-element-admin/vue-element-admin",
+			"destination": "/vue-element-admin/vue-element-admin/",
+			"permanent": false
+		}
 	]
 }

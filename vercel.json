@@ -1,11 +1,15 @@
 {
-  "github": {
-    "silent": true
-  },
-  "rewrites": [
-    {
-      "source": "/create-react-app/(.*)",
-      "destination": "/create-react-app/index.html"
-    }
-  ]
+	"github": {
+		"silent": true
+	},
+	"rewrites": [
+		{
+			"source": "/create-react-app/(.*)",
+			"destination": "/create-react-app/index.html"
+		},
+		{
+			"source": "/vue-element-admin/vue-element-admin/(.*)",
+			"destination": "/vue-element-admin/index.html"
+		}
+	]
 }

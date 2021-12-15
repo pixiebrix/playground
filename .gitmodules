@@ -1,3 +1,6 @@
 [submodule "vue-element-admin/repo"]
 	path = vue-element-admin/repo
 	url = https://github.com/PanJiaChen/vue-element-admin.git
+[submodule "react-admin/repo"]
+	path = react-admin/repo
+	url = https://github.com/marmelab/react-admin.git

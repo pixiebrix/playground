@@ -2,7 +2,7 @@
 
 set -e # exit when any command fails
 
-PUBLIC_URL=/react-admin/
+export PUBLIC_URL=/react-admin/
 
 cd repo
 
@@ -10,8 +10,4 @@ make install
 make build
 make build-demo
 
-cd examples/demo
-
-
-mv -f build ../../../../public/react-admin
-
+mv -f examples/demo/build ../../public/react-admin

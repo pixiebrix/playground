@@ -2,6 +2,8 @@
 
 set -e # exit when any command fails
 
+PUBLIC_URL=/react-admin/
+
 cd repo
 
 make install

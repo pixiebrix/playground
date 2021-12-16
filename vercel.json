@@ -10,6 +10,10 @@
 		{
 			"source": "/react-admin/(.*)",
 			"destination": "/react-admin/index.html"
+		},
+		{
+			"source": "/ngx-admin/(.*)",
+			"destination": "/ngx-admin/index.html"
 		}
 	]
 }

@@ -4,3 +4,6 @@
 [submodule "react-admin/repo"]
 	path = react-admin/repo
 	url = https://github.com/marmelab/react-admin.git
+[submodule "ngx-admin/repo"]
+	path = ngx-admin/repo
+	url = https://github.com/akveo/ngx-admin.git

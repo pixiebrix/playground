@@ -11,3 +11,4 @@ make build
 make build-demo
 
 mv -f examples/demo/build ../../public/react-admin
+

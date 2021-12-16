@@ -14,6 +14,6 @@
 		{
 			"source": "/ngx-admin/(.*)",
 			"destination": "/ngx-admin/index.html"
-		},
+		}
 	]
 }

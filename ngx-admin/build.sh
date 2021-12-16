@@ -5,7 +5,7 @@ set -e # exit when any command fails
 cd repo
 
 npm install
-npm build:prod
+npm run build:prod
 
 mv -f dist ../../public/ngx-admin
 

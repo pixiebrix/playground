@@ -2,7 +2,6 @@
 	"github": {
 		"silent": true
 	},
-	"cleanUrls": true,
 	"trailingSlash": true,
 	"rewrites": [
 		{

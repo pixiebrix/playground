@@ -15,10 +15,6 @@
 		{
 			"source": "/ngx-admin/(.*)",
 			"destination": "/ngx-admin/index.html"
-		},
-		{
-			"source": "/turbolinks/(.*)",
-			"destination": "/turbolinks/index.html"
 		}
 	]
 }

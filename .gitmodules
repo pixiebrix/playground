@@ -1,9 +1,12 @@
-[submodule "vue-element-admin/repo"]
-	path = vue-element-admin/repo
+[submodule "source/vue-element-admin/repo"]
+	path = source/vue-element-admin/repo
 	url = https://github.com/PanJiaChen/vue-element-admin.git
-[submodule "react-admin/repo"]
-	path = react-admin/repo
+	ignore = dirty
+[submodule "source/react-admin/repo"]
+	path = source/react-admin/repo
 	url = https://github.com/marmelab/react-admin.git
-[submodule "ngx-admin/repo"]
-	path = ngx-admin/repo
+	ignore = dirty
+[submodule "source/ngx-admin/repo"]
+	path = source/ngx-admin/repo
 	url = https://github.com/akveo/ngx-admin.git
+	ignore = dirty

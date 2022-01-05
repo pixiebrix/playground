@@ -15,30 +15,19 @@ _Some projects might be used for testing, it's often better to create a new proj
 
 ### Adding a static project
 
-1. Create a folder at the root of the repo, with at least an `index.html` file (like `/my-demo/index.html`)
+1. Create a folder in `static/`
+1. Add at least an `index.html` file (like `static/my-demo/index.html`)
 1. Access it at `https://pbx.vercel.app/my-demo/`
 
 ### Adding a project with a build
 
-1. Create a folder at the root of the repo with the source files, like `/my-demo/`
+1. Create a folder in `source/` with the source files, like `source/my-demo/`
    - Treat this folder as a self-contained project with its own `package.json` file
-1. Add its _install_ and _build_ steps in its own `build.sh` file (like `/my-demo/build.sh`)
-
-   - One of the steps must create a directory under `/public`, like `public/my-demo/index.html`
-   - Example:
-
-     ```sh
-     #! /bin/sh
-
-     set -e # exit when any command fails
-
-     yarn
-     PUBLIC_URL=/my-demo/ yarn run build
-
-     # "build" contains the generated code
-     # This command moves its content to the public /my-demo/ folder
-     mv build ../public/my-demo
-     ```
+1. Add the _install_ and _build_ steps in its own `build.sh` file (like `source/my-demo/build.sh`)
+	- it should include the exact header as other build.sh scripts
+	- it should output files in `public/`
+3. Run build.sh on your computer, like `bash source/my-demo/build.sh`
+4. Commit both `source` and `public` folders
 
 1. If your project is a single-page APP (i.e. all paths point to index.html), you'll have to edit `vercel.json` too
 1. Access it at `https://pbx.vercel.app/my-demo/`

@@ -7,3 +7,6 @@
 [submodule "ngx-admin/repo"]
 	path = source/ngx-admin/repo
 	url = https://github.com/akveo/ngx-admin.git
+[submodule "source/angular-js/repo"]
+	path = source/angular-js/repo
+	url = https://github.com/akveo/blur-admin.git

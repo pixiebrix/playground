@@ -9,6 +9,10 @@
 			"destination": "/create-react-app/index.html"
 		},
 		{
+			"source": "/navigation/(.*)",
+			"destination": "/navigation/index.html"
+		},
+		{
 			"source": "/ngx-admin/(.*)",
 			"destination": "/ngx-admin/index.html"
 		}

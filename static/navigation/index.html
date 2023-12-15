@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="https://unpkg.com/sakura.css/css/sakura.css" type="text/css">
+
+<style>
+	ul a:before {
+		content: "🔗 " attr(href) " ";
+	}
+</style>
+<title>Navigation playground</title>
+<body>
+	<h1>Navigation playground</h1>
+	<p>Open the console to see what `navigate` events are fired. <a href="https://github.com/pixiebrix/pixiebrix-extension/pull/7030">Related PR</a></p>
+	<ul>
+		<li><a href="#hash-1"></a></li>
+		<li><a href="#hash-2"></a></li>
+		<li><a href="./"></a></li>
+		<li><a href="./favicon.png"></a></li>
+		<li><a href="./favicon.png" download>[download]</a></li>
+		<li><a href="https://example.com"></a></li>
+		<li><a href="https://example.com" target="_blank">[target="_blank"]</a></li>
+		<li><button>history.pushState(null, null, "./new-page")</button></li>
+		<li><button>history.replaceState(null, null, "./other-page")</button></li>
+		<li><button>history.back()</button></li>
+		<li><button>history.forward()</button></li>
+		<li><button>location.reload()</button></li>
+	</ul>
+	<script>
+		document.addEventListener('click', function (event) {
+			if (event.target.tagName === 'BUTTON') {
+				eval(event.target.textContent);
+			}
+		});
+		const props = [
+			'navigationType',
+			'canIntercept',
+			'userInitiated',
+			'downloadRequest',
+			'defaultPrevented',
+			'hashChange',
+		];
+		window.navigation.addEventListener("navigate", event => {
+			console.log({event})
+			console.table(props.reduce((acc, prop) => ({...acc, [prop]: event[prop] }), {}));
+		});
+
+	</script>
+</body>

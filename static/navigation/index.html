@@ -44,8 +44,8 @@
 			'hashChange',
 		];
 		window.navigation.addEventListener("navigate", event => {
-			console.log({event})
-			console.table(props.reduce((acc, prop) => ({...acc, [prop]: event[prop] }), {}));
+			console.log({HANDLE_NAVIGATE: event})
+			console.table(props.reduce((acc, prop) => ({...acc, [prop]: event[prop] }), {HANDLE_NAVIGATE: 'use this filter'}));
 		});
 
 	</script>

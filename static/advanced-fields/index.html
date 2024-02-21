@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+<title>Advanced fields playground</title>
+<style>
+	iframe {
+		width: 100%;
+		height: 100vh;
+	}
+</style>
+<body>
+	<h1>Advanced fields playground</h1>
+
+	<h2>input</h2>
+	<p><label>input <input></label></p>
+	<p><label>input[type="text"] <input type="text"></label></p>
+	<p><label>input[type="text"] with value <input type="text" value="PixieBrix Rocks"></label></p>
+	<p><label>input[type="text"] readonly <input type="text" value="PixieBrix Rocks" readonly></label></p>
+	<p><label>input[type="password"] <input type="password"></label></p>
+	<p><label>input[type="email"] <input type="email"></label></p>
+	<p><label>input[type="tel"] <input type="tel"></label></p>
+	<p><label>input[type="number"] <input type="number"></label></p>
+	<p><label>input[type="search"] <input type="search"></label></p>
+	<p><label>input[type="date"] <input type="date"></label></p>
+	<p><label>input[type="datetime"] <input type="datetime"></label></p>
+	<p><label>input[type="checkbox"] <input type="checkbox"></label></p>
+	<p><label>input[type="radio"] <input name="radiostar" type="radio"></label>  <input name="radiostar" type="radio"></label></p>
+	<p><label>input[type="hidden"] <input type="hidden"></label></p>
+	<p><label>input[type="range"] <input type="range"></label></p>
+	<p><label>input[type="submit"] <input type="submit"></label></p>
+
+	<h2>textarea</h2>
+	<p>
+		<label>
+			textarea<br>
+			<textarea></textarea>
+		</label>
+	</p>
+	<p>
+		<label>
+			textarea with content<br>
+			<textarea>Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi modi velit tempore, perferendis iusto omnis. Cum ut in quae, perferendis reprehenderit perspiciatis provident totam nesciunt possimus minus eligendi iste exercitationem!</textarea>
+		</label>
+	</p>
+
+	<p>
+		<label>
+			textarea readonly<br>
+			<textarea readonly>Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi modi velit tempore, perferendis iusto omnis. Cum ut in quae, perferendis reprehenderit perspiciatis provident totam nesciunt possimus minus eligendi iste exercitationem!</textarea>
+		</label>
+	</p>
+
+	<h2>contentEditable</h2>
+	<p>
+		contentEditable<br>
+		<div contenteditable></div>
+	</p>
+	<p>
+		<label>contentEditable with content</label><br>
+		<div contenteditable>
+			<h3>Fillers</h3>
+			<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi modi velit tempore, <strong>perferendis iusto omnis</strong>.</p>
+			<p>Cum ut in quae, perferendis <span style="color:red">reprehenderit perspiciatis provident</span> totam nesciunt possimus minus eligendi iste exercitationem!</p>
+		</div>
+	</p>
+	<p>
+		<label>contentEditable with non-editable blocks</label><br>
+		<div contenteditable>
+			<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi modi velit tempore, <strong>perferendis iusto omnis</strong>.</p>
+			<p style="color: gray; font-style: italic;" contenteditable="false">You can't touch this</p>
+			<p>Cum ut in quae, perferendis reprehenderit perspiciatis providenttotam nesciunt possimus minus eligendi iste exercitationem!</p>
+		</div>
+	</p>
+
+	<h2>DraftJS</h2>
+	<div>DraftJS</div>
+
+	<h2>TinyMCE</h2>
+	<div>TinyMCE</div>
+
+	<h2>CKEditor</h2>
+	<div>CKEditor</div>
+
+	<h2>iframed page</h2>
+	<iframe src="./index.html">
+		There's supposed to be a frame here, but the browser did not load it.
+	</iframe>
+</body>

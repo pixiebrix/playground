@@ -7,7 +7,41 @@
 		width: 100%;
 		height: 100vh;
 	}
+
+	/* Copied from the imported stylesheet to match textarea */
+
+	[contenteditable] {
+		color: var(--form-text);
+		background-color: var(--background);
+		font-family: inherit;
+		font-size: inherit;
+		margin-right: 6px;
+		margin-bottom: 6px;
+		padding: 10px;
+		border: none;
+		border-radius: 6px;
+		outline: none;
+	}
+
+	[contenteditable]:focus {
+		box-shadow: 0 0 0 2px var(--focus);
+	}
+
+	@media (prefers-color-scheme: dark) {
+
+		[contenteditable] {
+			background-color: #161f27;
+			background-color: var(--background);
+			color: #fff;
+			color: var(--form-text);
+		}
+		[contenteditable]:focus {
+			box-shadow: 0 0 0 2px var(--focus);
+		}
+	}
+
 </style>
+
 <body>
 	<h1>Advanced fields playground</h1>
 
@@ -57,11 +91,11 @@
 	</p>
 	<p>
 		<label>contentEditable with content</label><br>
-		<div contenteditable>
-			<h3>Fillers</h3>
-			<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi modi velit tempore, <strong>perferendis iusto omnis</strong>.</p>
-			<p>Cum ut in quae, perferendis <span style="color:red">reprehenderit perspiciatis provident</span> totam nesciunt possimus minus eligendi iste exercitationem!</p>
-		</div>
+	<div contenteditable>
+		<h3>Fillers</h3>
+		<p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi modi velit tempore, <strong>perferendis iusto omnis</strong>.</p>
+		<p>Cum ut in quae, perferendis <span style="color:red">reprehenderit perspiciatis provident</span> totam nesciunt possimus minus eligendi iste exercitationem!</p>
+	</div>
 	</p>
 	<p>
 		<label>contentEditable with non-editable blocks</label><br>

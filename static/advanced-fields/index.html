@@ -10,7 +10,7 @@
 
 	/* Copied from the imported stylesheet to match textarea */
 
-	[contenteditable] {
+	body > [contenteditable] {
 		color: var(--form-text);
 		background-color: var(--background);
 		font-family: inherit;
@@ -23,19 +23,20 @@
 		outline: none;
 	}
 
-	[contenteditable]:focus {
+	body > [contenteditable]:focus {
 		box-shadow: 0 0 0 2px var(--focus);
 	}
 
 	@media (prefers-color-scheme: dark) {
 
-		[contenteditable] {
+		body > [contenteditable] {
 			background-color: #161f27;
 			background-color: var(--background);
 			color: #fff;
 			color: var(--form-text);
 		}
-		[contenteditable]:focus {
+
+		body > [contenteditable]:focus {
 			box-shadow: 0 0 0 2px var(--focus);
 		}
 	}
@@ -107,13 +108,23 @@
 	</p>
 
 	<h2>DraftJS</h2>
-	<div>DraftJS</div>
+	<textarea class="draftjs">Not yet implemented</textarea>
 
-	<h2>TinyMCE</h2>
-	<div>TinyMCE</div>
+	<h2>TinyMCE 6</h2>
+	<textarea class="tinymce6">This is an editor</textarea>
+	<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+	<script>tinymce.init({ selector: '.tinymce6' });</script>
 
-	<h2>CKEditor</h2>
-	<div>CKEditor</div>
+	<h2>CKEditor 4</h2>
+	<textarea name="ckeditor4">This is an editor</textarea>
+	<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+	<script>CKEDITOR.replace('ckeditor4')</script>
+
+	<h2>CKEditor 5</h2>
+	<div class="ckeditor5">This is an editor</div>
+	<script src="https://cdn.ckeditor.com/ckeditor5/41.1.0/classic/ckeditor.js"></script>
+	<script>ClassicEditor.create(document.querySelector('.ckeditor5'))</script>
+
 
 	<h2>iframed page</h2>
 	<iframe src="./">

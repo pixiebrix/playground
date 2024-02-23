@@ -54,10 +54,10 @@
   </table>
   <script>
     function printEvent(event) {
-      const div = document.createElement("div");
+      const printedEvent = document.createElement("div");
       const key = event.key;
       const type = event.type;
-      div.textContent = key ? `${type}: ${key}` : type;
+      printedEvent.textContent = key ? `${type}: ${key}` : type;
       const output =
         event.currentTarget === input
           ? outputInput
@@ -65,10 +65,11 @@
           ? outputDocumentCapture
           : outputDocument;
 
-      output.prepend(div);
-      if (output.children.length > 30) {
-        output.lastElementChild.remove();
-      }
+      output.prepend(printedEvent);
+
+      setTimeout(() => {
+        printedEvent.remove();
+      }, 15000);
     }
 
     for (const type of [

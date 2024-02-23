@@ -10,7 +10,8 @@
 
 	/* Copied from the imported stylesheet to match textarea */
 
-	body > [contenteditable] {
+	body>[contenteditable],
+	.public-DraftEditor-content {
 		color: var(--form-text);
 		background-color: var(--background);
 		font-family: inherit;
@@ -21,24 +22,15 @@
 		border: none;
 		border-radius: 6px;
 		outline: none;
-	}
 
-	body > [contenteditable]:focus {
-		box-shadow: 0 0 0 2px var(--focus);
-	}
-
-	@media (prefers-color-scheme: dark) {
-
-		body > [contenteditable] {
-			background-color: #161f27;
-			background-color: var(--background);
-			color: #fff;
-			color: var(--form-text);
-		}
-
-		body > [contenteditable]:focus {
+		&:focus {
 			box-shadow: 0 0 0 2px var(--focus);
 		}
+	}
+
+	.draftjs {
+		/* Make space for the floating toolbar */
+		padding-top: 80px;
 	}
 
 </style>
@@ -108,7 +100,47 @@
 	</p>
 
 	<h2>DraftJS</h2>
-	<textarea class="draftjs">Not yet implemented</textarea>
+	<div class="draftjs">Loading…</div>
+	<script type="module">
+		import React from 'https://cdn.skypack.dev/react';
+		import ReactDOM from 'https://cdn.skypack.dev/react-dom';
+		import draftjs from 'https://esm.sh/draft-js@0.11.7';
+		const { Editor, EditorState } = draftjs;
+		function MyEditor() {
+			const [editorState, setEditorState] = React.useState(
+				EditorState.createEmpty()
+			);
+
+			const editor = React.useRef(null);
+
+			function focusEditor() {
+				editor.current.focus();
+			}
+
+			React.useEffect(() => {
+				focusEditor()
+			}, []);
+
+			return React.createElement(
+				"div",
+				{ onClick: focusEditor },
+				React.createElement(
+					Editor,
+					{
+						ref: editor,
+						editorState: editorState,
+						onChange: editorState => setEditorState(editorState)
+					}
+				)
+			);
+
+		}
+
+		ReactDOM.render(
+			React.createElement(MyEditor, null),
+			document.querySelector('.draftjs')
+		);
+	</script>
 
 	<h2>TinyMCE 6</h2>
 	<textarea class="tinymce6">This is an editor</textarea>

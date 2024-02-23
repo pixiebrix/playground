@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css"
+/>
+<title>Events playground</title>
+<style>
+  tr {
+    background-color: transparent !important;
+  }
+  output {
+    display: block;
+    white-space: pre;
+    background-color: #8882;
+    padding: 5px;
+    min-height: 100px;
+    font-weight: 100;
+  }
+  output div {
+    animation: from-bold 5s;
+  }
+  @keyframes from-bold {
+    from {
+      font-weight: 700;
+    }
+  }
+</style>
+<body>
+  <h1>Events playground</h1>
+  <p>
+    This page listens to some events and it prints them in the dedicated column.
+    This playground can be used to ensure that events from within our widgets
+    don't leak onto the page.
+  </p>
+  <p>
+    <label>
+      Example input field
+      <input type="text" value="I like turtles" id="input" />
+    </label>
+  </p>
+  <p>A note about events: Only a single <code>event</code> object object is passed around listeners for each event. Different listeners and different phases (like <code>capture</code>) still deal with the same <code>event</code> object. So there cannot be a <code>capture</code> event on input fields because it's already the top-most target.</p>
+  <table>
+    <tr>
+      <th>document</th>
+      <th>document capture</th>
+      <th>input</th>
+    </tr>
+    <tr>
+      <td><output id="outputDocument"></output></td>
+      <td><output id="outputDocumentCapture"></output></td>
+      <td><output id="outputInput"></output></td>
+    </tr>
+  </table>
+  <script>
+    function printEvent(event) {
+      const div = document.createElement("div");
+      const key = event.key;
+      const type = event.type;
+      div.textContent = key ? `${type}: ${key}` : type;
+      const output =
+        event.currentTarget === input
+          ? outputInput
+          : event.eventPhase === Event.CAPTURING_PHASE
+          ? outputDocumentCapture
+          : outputDocument;
+
+      output.prepend(div);
+      if (output.children.length > 30) {
+        output.lastElementChild.remove();
+      }
+    }
+
+    for (const type of [
+      "click",
+      "keydown",
+      "keypress",
+      "keyup",
+      "input",
+      "focus",
+      "blur",
+    ]) {
+      document.addEventListener(type, printEvent);
+      document.addEventListener(type, printEvent, { capture: true });
+      input.addEventListener(type, printEvent);
+    }
+  </script>
+</body>

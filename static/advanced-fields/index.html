@@ -112,10 +112,6 @@
 				editor.current.focus();
 			}
 
-			React.useEffect(() => {
-				focusEditor()
-			}, []);
-
 			return React.createElement(
 				"div",
 				{ onClick: focusEditor },

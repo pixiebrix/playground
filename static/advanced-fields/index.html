@@ -23,10 +23,6 @@
 		}
 	}
 
-	.draftjs {
-		/* Make space for the floating toolbar */
-		padding-top: 80px;
-	}
 	h2 {
 		margin-top: 100px;
 	}
@@ -101,39 +97,14 @@
 
 	<h2><a id="draftjs" href="#draftjs">DraftJS</a> (<a href="https://draftjs.org/#:~:text=scalable%20memory%20usage.-,Try%20it%20out!,-Here%27s%20a%20simple">Docs</a>)</h2>
 	<div class="draftjs">Loading…</div>
+	<link rel="stylesheet" href="https://cdn.skypack.dev/react-draft-wysiwyg/dist/react-draft-wysiwyg.css">
 	<script type="module">
 		import React from 'https://cdn.skypack.dev/react';
 		import ReactDOM from 'https://cdn.skypack.dev/react-dom';
-		import draftjs from 'https://esm.sh/draft-js@0.11.7';
-		const { Editor, EditorState } = draftjs;
-		function MyEditor() {
-			const [editorState, setEditorState] = React.useState(
-				EditorState.createEmpty()
-			);
-
-			const editor = React.useRef(null);
-
-			function focusEditor() {
-				editor.current.focus();
-			}
-
-			return React.createElement(
-				"div",
-				{ onClick: focusEditor },
-				React.createElement(
-					Editor,
-					{
-						ref: editor,
-						editorState: editorState,
-						onChange: editorState => setEditorState(editorState)
-					}
-				)
-			);
-
-		}
+		import wysiwyg from 'https://esm.sh/react-draft-wysiwyg@1.15.0';
 
 		ReactDOM.render(
-			React.createElement(MyEditor, null),
+			React.createElement(wysiwyg.Editor, null),
 			document.querySelector('.draftjs')
 		);
 	</script>
@@ -146,7 +117,10 @@
 	<h2><a id="ckeditor4" href="#ckeditor4">CKEditor 4</a> (<a href="https://ckeditor.com/ckeditor-4/demo/">Docs</a>)</h2>
 	<textarea name="ckeditor4-field">This is an editor</textarea>
 	<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
-	<script>CKEDITOR.replace('ckeditor4-field')</script>
+	<script>
+		CKEDITOR.disableAutoInline = true; // Without this, it automatically enables itself on the CKE5 field too
+		CKEDITOR.replace('ckeditor4-field');
+	</script>
 
 	<h2><a id="ckeditor5" href="#ckeditor5">CKEditor 5</a> (<a href="https://ckeditor.com/ckeditor-5/demo/editor-types/">Docs</a>)</h2>
 	<div class="ckeditor5">This is an editor</div>

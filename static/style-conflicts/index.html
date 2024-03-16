@@ -26,6 +26,10 @@
 		/* all:initial breaks contenteditable. This restores it */
 		-webkit-user-modify: read-write;
 	}
+	div {
+		overflow-y: scroll;
+		height: 300px;
+	}
 </style>
 <body>
 	<blockquote>
@@ -42,6 +46,13 @@
 	letter-spacing: 1em;
 	color: red;
 }
+div {
+	background-color: darkblue;
+	color-scheme: dark;
+	border: 5px dashed darkolivegreen;
+	border-radius: 3em;
+	width: 4em;
+}
 </style>
 
 	<h1>Test page</h1>
@@ -49,4 +60,15 @@
 	<button>Button</button>
 	<a href="#link">Link</a>
 	<input type="text" value="Input field">
+	<div>
+		<ul>
+			<li>1</li>
+			<li>2</li>
+			<li>3</li>
+			<li>4</li>
+			<li>5</li>
+			<li>6</li>
+			<li>7</li>
+		</ul>
+	</div>
 </body>

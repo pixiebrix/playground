@@ -53,6 +53,12 @@ div {
 	border-radius: 3em;
 	width: 4em;
 }
+div:not(.local)::-webkit-scrollbar {
+	background-color: fuchsia;
+}
+div:not(.local) {
+	scrollbar-color: red yellow;
+}
 </style>
 
 	<h1>Test page</h1>
@@ -60,7 +66,7 @@ div {
 	<button>Button</button>
 	<a href="#link">Link</a>
 	<input type="text" value="Input field">
-	<div>
+	<div class="local">
 		<ul>
 			<li>1</li>
 			<li>2</li>

@@ -31,7 +31,8 @@
 		height: 300px;
 	}
 </style>
-<body>
+<!-- The d-flex class will make Bootstrap style leaks immediately obvious -->
+<body class="d-flex">
 	<blockquote>
 		<p>Our components might inadvertently inherit some style from the page. This test page has many exaggerated styles to make this leak immediately visible. This description is excluded. <strong>The solution is usually to set <small><code>all:initial</code></small> at the root of your widget.</strong></p>
 		<p>The styles are editable:</p>

@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <meta charset="utf-8" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tinymce@6.8.5/skins/ui/oxide/content.min.css" integrity="sha256-2O0twlBqGq0T3SxW56BBNI8yK6B9QjAzDQSDTIQ98rU=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/quill@1.3.7/dist/quill.snow.css">
 <title>Advanced fields playground</title>
 <style>
@@ -116,8 +117,8 @@
 
 	<h2><a id="tinymce6" href="#tinymce6">TinyMCE 6</a> (<a href="https://www.tiny.cloud/docs/tinymce/6/">Docs</a>)</h2>
 	<textarea class="tinymce6">This is an editor</textarea>
-	<script src="https://cdn.tiny.cloud/1/fydk6s99b9ur27xw8b6ugkaxy9rrdwyc65nf6m0ulga3y9w5/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
-	<script>tinymce.init({ selector: '.tinymce6' });</script>
+	<script src="https://cdn.jsdelivr.net/npm/tinymce@6.8.5/tinymce.min.js" integrity="sha256-yFZrFbtKKJ5Q+buySYOf3fcUbtRMwXrQXAPqHMqNmRo=" crossorigin="anonymous"></script>
+	<script>tinymce.init({ selector: '.tinymce6',  license_key: 'gpl', promotion: false });</script>
 
 	<h2><a id="ckeditor4" href="#ckeditor4">CKEditor 4</a> (<a href="https://ckeditor.com/ckeditor-4/demo/">Docs</a>)</h2>
 	<textarea name="ckeditor4-field">This is an editor</textarea>

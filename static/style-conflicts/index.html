@@ -34,7 +34,7 @@
 	}
 </style>
 <!-- The d-flex class will make Bootstrap style leaks immediately obvious -->
-<body class="d-flex local">
+<body class="d-flex">
 	<blockquote class="local">
 		<p>Our components might inadvertently inherit some style from the page. This test page has many exaggerated styles to make this leak immediately visible. This description is excluded. <strong>The solution is usually to set <small><code>all:initial</code></small> at the root of your widget.</strong></p>
 		<p>The styles are editable:</p>
@@ -48,7 +48,8 @@
 	font-style: italic;
 	letter-spacing: 1em;
 	color: red;
-	margin: 200px;
+	margin: 100px;
+	border: solid 1px cyan;
 }
 div {
 	background-color: darkblue;
@@ -56,6 +57,8 @@ div {
 	border: 5px dashed darkolivegreen;
 	border-radius: 3em;
 	width: 4em;
+	filter: invert(1) hue-rotate(90deg);
+	transform: rotate(5deg);
 }
 div:not(.local)::-webkit-scrollbar {
 	background-color: fuchsia;
@@ -67,14 +70,15 @@ svg {
 	fill: hotpink;
 	stroke: cyan;
 }
-* {
-	/* Match *all* elements, e.g. dialog */
-	*:not(.local, .local *, html, head, .pixiebrix-content-script-indicator) {
-		outline: double 10px #f0f4;
-		filter: invert(1) hue-rotate(90deg);
-		transform: rotate(5deg);
-		opacity: 0.8;
-	}
+
+/* Match *all* elements, e.g. dialog */
+*:not(.local, .local *, html, body, head, .pixiebrix-content-script-indicator, #__bs_notify__) {
+	outline: double 10px #f0f4;
+	opacity: 0.6;
+}
+::selection {
+	background-color: yellow;
+	color: white;
 }
 </style>
 

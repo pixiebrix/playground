@@ -3,7 +3,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Root font tester (rem, etc)</title>
 
-<style>
+<style class="local">
 	head,
 	style[contenteditable] {
 		display: block;
@@ -15,6 +15,9 @@
 		border: solid 2px;
 		border-radius: 3px;
 		padding: 20px;
+		margin: auto;
+		max-width: 500px;
+		overflow-x: scroll
 	}
 	style[contenteditable] {
 		white-space: pre;
@@ -31,13 +34,13 @@
 	}
 </style>
 <!-- The d-flex class will make Bootstrap style leaks immediately obvious -->
-<body class="d-flex">
-	<blockquote>
+<body class="d-flex local">
+	<blockquote class="local">
 		<p>Our components might inadvertently inherit some style from the page. This test page has many exaggerated styles to make this leak immediately visible. This description is excluded. <strong>The solution is usually to set <small><code>all:initial</code></small> at the root of your widget.</strong></p>
 		<p>The styles are editable:</p>
 	</blockquote>
 
-<style contenteditable>html {
+<style contenteditable class="local">html {
 	font-size: 2em;
 	font-family: monospace;
 	line-height: 5em;
@@ -63,13 +66,22 @@ svg {
 	fill: hotpink;
 	stroke: cyan;
 }
+* {
+	/* Match *all* elements, e.g. dialog */
+	*:not(.local, .local *, html, head, .pixiebrix-content-script-indicator) {
+		outline: double 10px #f0f4;
+		filter: invert(1) hue-rotate(90deg);
+		transform: rotate(5deg);
+		opacity: 0.8;
+	}
+}
 </style>
 
-	<h1>Test page</h1>
+	<h1 class="local">Test page</h1>
 
-	<button>Button</button>
-	<a href="#link">Link</a>
-	<input type="text" value="Input field">
+	<button class="local">Button</button>
+	<a href="#link" class="local">Link</a>
+	<input type="text" value="Input field" class="local">
 	<div class="local">
 		<ul>
 			<li>1</li>

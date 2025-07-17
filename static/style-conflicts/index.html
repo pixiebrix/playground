@@ -50,12 +50,14 @@
 	color: red;
 	margin: 200px;
 }
-div {
+div:not(#__bs_notify__) {
 	background-color: darkblue;
 	color-scheme: dark;
 	border: 5px dashed darkolivegreen;
 	border-radius: 3em;
 	width: 4em;
+	filter: invert(1) hue-rotate(90deg);
+	transform: rotate(5deg);
 }
 div:not(.local)::-webkit-scrollbar {
 	background-color: fuchsia;
@@ -69,11 +71,9 @@ svg {
 }
 
 /* Match *all* elements, e.g. dialog */
-*:not(.local, .local *, html, body, head, .pixiebrix-content-script-indicator) {
+*:not(.local, .local *, html, body, head, .pixiebrix-content-script-indicator, #__bs_notify__) {
 	outline: double 10px #f0f4;
-	filter: invert(1) hue-rotate(90deg);
-	transform: rotate(5deg);
-	opacity: 0.8;
+	opacity: 0.6;
 }
 ::selection {
 	background-color: yellow;

@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selection Highlighter</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            cursor: text;
+        }
+
+        .outline-highlight {
+            outline: 3px solid #6366f1; /* Tailwind's indigo-500 */
+            transition: outline 0.2s ease-in-out;
+            outline-offset: 4px;
+        }
+
+        .shadow-highlight {
+            outline: 3px solid #10b981; /* Tailwind's emerald-500 */
+            outline-offset: 4px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8 flex flex-col items-center min-h-screen">
+
+    <main class="w-full max-w-3xl bg-white p-8 rounded-xl shadow-lg space-y-6">
+        <h1 class="text-4xl font-bold text-center text-gray-800">Selection Highlighter Demo</h1>
+        <p class="text-center text-gray-600">
+            Select any text on this page to see the closest element get a purple outline.
+            Try selecting text inside the green box below to see how it works with a Shadow DOM.
+        </p>
+
+        <!-- Main Document Body Content -->
+        <h2 class="text-2xl font-semibold text-gray-700">Content in the Main DOM</h2>
+        <div class="p-4 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
+            <p>
+                <strong>Bolded text</strong> is one of many inline elements. Selecting it will highlight its parent `p` tag.
+            </p>
+            <p>
+                Here is a more <em>complex nested structure</em>: a paragraph with a <span><b>nested bold element</b> and a <a href="#">link inside a span</a></span>. The highlighter will find the closest parent element to your selection.
+            </p>
+            <p>
+                This is another paragraph with a <s>struck-through</s> word and a <strong><em>bold and italicized phrase</em></strong>.
+            </p>
+        </div>
+
+        <!-- Shadow DOM Example -->
+        <h2 class="text-2xl font-semibold text-gray-700">Content Inside a Shadow DOM</h2>
+        <my-shadow-element></my-shadow-element>
+
+    </main>
+
+    <script>
+        // Custom Web Component for the Shadow DOM example
+        class MyShadowElement extends HTMLElement {
+            constructor() {
+                super();
+                // Create a shadow root and attach it to the element
+                const shadow = this.attachShadow({ mode: 'open' });
+
+                // Create the element structure inside the shadow root
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = `
+                    <style>
+                        :host {
+                            display: block;
+                            padding: 1rem;
+                            border: 2px solid #10b981;
+                            border-radius: 0.5rem;
+                            background-color: #f0fdf4;
+                            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+                            transition: all 0.2s ease-in-out;
+                            color: #064e3b;
+                        }
+                        p {
+                            margin: 0.5rem 0;
+                        }
+                    </style>
+                    <p>This entire box is a custom element with its own isolated Shadow DOM. Selecting text inside this paragraph will highlight the element inside the shadow root and the host element itself. This paragraph contains <strong><a href="#">a bold link</a> and a <em>very important word</em></strong> within its text.</p>
+                    <p>
+                        This is a specific internal element inside the shadow root. A selection within this text will trigger two outlines: a green outline on this element and a purple outline on the host element. We've added <span>more <b>nested</b> <em>inline</em> elements</span> to this text.
+                    </p>
+                `;
+                shadow.appendChild(wrapper);
+            }
+        }
+        customElements.define('my-shadow-element', MyShadowElement);
+
+        // Function to remove all existing outlines
+        function clearOutlines() {
+            // Clear main DOM highlights
+            document.querySelectorAll('.outline-highlight').forEach(el => {
+                el.classList.remove('outline-highlight');
+            });
+            // Clear shadow DOM highlights
+            document.querySelectorAll('.shadow-highlight').forEach(el => {
+                 el.classList.remove('shadow-highlight');
+            });
+        }
+
+        // Listen for the 'selectionchange' event to detect a text selection
+        document.addEventListener('selectionchange', () => {
+            clearOutlines(); // Clear any previous outlines
+            const selection = window.getSelection();
+
+            // Check if there is a valid selection
+            if (selection.rangeCount > 0 && selection.toString().length > 0) {
+                const range = selection.getRangeAt(0);
+                let element = range.commonAncestorContainer;
+
+                // If the container is a text node, get its parent element
+                if (element.nodeType === Node.TEXT_NODE) {
+                    element = element.parentElement;
+                }
+
+                const root = element.getRootNode();
+
+                if (root instanceof ShadowRoot) {
+                    // Case 2: Inside a Shadow DOM. Highlight the specific element.
+                    element.classList.add('shadow-highlight');
+
+                } else {
+                    // Case 1: In the main DOM. Highlight the element.
+                    element.classList.add('outline-highlight');
+                }
+            }
+        });
+    </script>
+</body>
+</html>

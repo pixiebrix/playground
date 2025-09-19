@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Selection Handler Playground</title>
+    <style>
+        :root {
+            --bg-color: #f7f9fc;
+            --main-component-border: #4CAF50;
+            --nested-component-border: #E53935;
+            --visualizer-border: #2196F3;
+            --font-family: 'Segoe UI', Arial, sans-serif;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: var(--font-family);
+            background-color: var(--bg-color);
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            position: relative; /* Needed for positioning the floating rect */
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid #ddd;
+        }
+
+        h1, h2 {
+            color: #1a237e;
+        }
+
+        /* --- Custom Component Styles --- */
+        my-main-component {
+            display: block;
+            border: 2px solid var(--main-component-border);
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #f1fff1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        my-nested-component {
+            display: block;
+            margin-top: 15px;
+            border: 2px solid var(--nested-component-border);
+            border-radius: 8px;
+            padding: 15px;
+            background-color: #fff1f1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* --- Visualizer Styles --- */
+        .visualizer-container {
+            text-align: center;
+        }
+
+        .selection-visualizer {
+            border: 2px dashed var(--visualizer-border);
+            background-color: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: left;
+            overflow-x: auto;
+            font-size: 1.1em;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            min-height: 100px;
+        }
+
+        .selection-visualizer h3 {
+            margin-top: 0;
+            color: var(--visualizer-border);
+        }
+
+        /* --- Iframe Styles --- */
+        .iframe-container {
+            border: 2px solid #6c757d;
+            border-radius: 8px;
+            padding: 10px;
+            background-color: #f0f2f5;
+        }
+
+        iframe {
+            width: -webkit-fill-available;
+            height: 500px;
+            border: solid;
+            border-radius: 6px;
+        }
+
+        /* --- Floating Rect Style --- */
+        #selection-rect {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 0;
+            pointer-events: none; /* Prevents interference with mouse events */
+            background-color: rgba(200, 200, 200, 0.3); /* Semi-transparent gray highlight */
+            border: 1px solid var(--nested-component-border); /* Red border */
+            border-radius: 4px;
+            transition: all 0.1s ease-out;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Floating rect element -->
+    <div id="selection-rect"></div>
+
+    <div class="container">
+        <h1>Selection Handler Playground</h1>
+        <p>This page demonstrates how text selection works across different Shadow DOM boundaries. Select some text in the components below to see the visualizer update.</p>
+
+        <h2>Component Section</h2>
+        <my-main-component></my-main-component>
+    </div>
+
+    <div class="container visualizer-container">
+        <h2>Selected Text Visualizer</h2>
+        <pre id="selection-visualizer" class="selection-visualizer">Select some text to see it appear here...</pre>
+    </div>
+
+    <div class="container iframe-container">
+        <h2>Iframe Preview of this Document</h2>
+        <iframe id="self-iframe" src="."></iframe>
+    </div>
+
+    <script>
+        // Define the main component with an open shadow root
+        class MyMainComponent extends HTMLElement {
+            constructor() {
+                super();
+                // Create an open shadow root
+                const shadow = this.attachShadow({ mode: 'open' });
+                shadow.innerHTML = `
+                    <style>
+                        #main-content {
+                            padding: 10px;
+                            background-color: #e9f5ff;
+                            border-radius: 6px;
+                        }
+                        p { margin: 0.5em 0; }
+                    </style>
+                    <div id="main-content">
+                        <h3>Main Component (Open Shadow Root)</h3>
+                        <p>This paragraph is inside the main component's shadow root.
+                            You can select text from here, and the visualizer will update.</p>
+                        <p>This component has an <span style="color: green;">open</span> shadow root, meaning its internal DOM is accessible from the main document.</p>
+                        <my-nested-component></my-nested-component>
+                    </div>
+                `;
+            }
+        }
+        customElements.define('my-main-component', MyMainComponent);
+
+        // Define the nested component with a closed shadow root
+        class MyNestedComponent extends HTMLElement {
+            constructor() {
+                super();
+                // Create a closed shadow root
+                const shadow = this.attachShadow({ mode: 'closed' });
+                shadow.innerHTML = `
+                    <style>
+                        #nested-content {
+                            padding: 10px;
+                            background-color: #fff5e3;
+                            border-radius: 6px;
+                        }
+                        p { margin: 0.5em 0; }
+                    </style>
+                    <div id="nested-content">
+                        <h4>Nested Component (Closed Shadow Root)</h4>
+                        <p>This text is inside the nested component's shadow root.
+                            You can select this text, and the visualizer will *still* update.</p>
+                        <p>This component has a <span style="color: red;">closed</span> shadow root.
+                            Its internal DOM is inaccessible, but selection events still bubble up to the main document.</p>
+                    </div>
+                `;
+            }
+        }
+        customElements.define('my-nested-component', MyNestedComponent);
+
+        // Get the visualizer and floating rect elements
+        const visualizer = document.getElementById('selection-visualizer');
+        const selectionRect = document.getElementById('selection-rect');
+
+        // Add a 'selectionchange' event listener to the document
+        document.addEventListener('selectionchange', () => {
+            const selection = window.getSelection();
+            const selectedText = selection.toString().trim();
+
+            // Update the text visualizer
+            if (selectedText !== '') {
+                visualizer.textContent = selectedText;
+            } else {
+                visualizer.textContent = 'Select some text to see it appear here...';
+            }
+
+            // Update the floating rect's position and size
+            if (selection.rangeCount > 0) {
+                const range = selection.getRangeAt(0);
+                const rect = range.getBoundingClientRect();
+
+                if (rect.width > 0 && rect.height > 0) {
+                    selectionRect.style.display = 'block';
+                    selectionRect.style.left = `${rect.left + window.scrollX}px`;
+                    selectionRect.style.top = `${rect.top + window.scrollY}px`;
+                    selectionRect.style.width = `${rect.width}px`;
+                    selectionRect.style.height = `${rect.height}px`;
+                } else {
+                    selectionRect.style.display = 'none';
+                }
+            } else {
+                selectionRect.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

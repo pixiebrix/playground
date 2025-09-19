@@ -93,9 +93,9 @@
         }
 
         iframe {
-            width: 100%;
+            width: -webkit-fill-available;
             height: 500px;
-            border: none;
+            border: solid;
             border-radius: 6px;
         }
 
@@ -135,8 +135,7 @@
 
     <div class="container iframe-container">
         <h2>Iframe Preview of this Document</h2>
-        <p>This iframe loads the current document itself. Selection handlers within iframes are typically isolated, so you will not see the visualizer update when you select text inside this frame.</p>
-        <iframe id="self-iframe" src=""></iframe>
+        <iframe id="self-iframe" src="."></iframe>
     </div>
 
     <script>

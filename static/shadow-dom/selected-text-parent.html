@@ -92,15 +92,17 @@
         customElements.define('my-shadow-element', MyShadowElement);
 
         // Function to remove all existing outlines
+        const highlightedElements = new Set();
         function clearOutlines() {
-            // Clear main DOM highlights
-            document.querySelectorAll('.outline-highlight').forEach(el => {
+            highlightedElements.forEach(el => {
                 el.classList.remove('outline-highlight');
+                el.style.outline = '';
+                el.style.outlineOffset = '';
             });
-            // Clear shadow DOM highlights
-            document.querySelectorAll('.shadow-highlight').forEach(el => {
-                 el.classList.remove('shadow-highlight');
-            });
+        }
+
+        function getElementFromNode(node) {
+            return node.nodeType === Node.TEXT_NODE ? node.parentElement : node;
         }
 
         // Listen for the 'selectionchange' event to detect a text selection
@@ -108,26 +110,30 @@
             clearOutlines(); // Clear any previous outlines
             const selection = window.getSelection();
 
+
+            const isInShadowDom = selection.isCollapsed && selection.toString().length > 0;
+            if (isInShadowDom) {
+                for (const c of selection.anchorNode.children) {
+                    try {
+                        const element = getElementFromNode(c.shadowRoot?.getSelection?.().getRangeAt(0).commonAncestorContainer);
+                        element.style.outline = '3px solid #10b981'; // Tailwind's emerald-500
+                        element.style.outlineOffset = '4px';
+                        highlightedElements.add(element);
+                    } catch (e) {
+                        console.log('No shadow root', e);
+                    }
+                }
+
+                // No shadow root found, continue with regular code
+            }
+
             // Check if there is a valid selection
             if (selection.rangeCount > 0 && selection.toString().length > 0) {
                 const range = selection.getRangeAt(0);
-                let element = range.commonAncestorContainer;
-
-                // If the container is a text node, get its parent element
-                if (element.nodeType === Node.TEXT_NODE) {
-                    element = element.parentElement;
-                }
-
-                const root = element.getRootNode();
-
-                if (root instanceof ShadowRoot) {
-                    // Case 2: Inside a Shadow DOM. Highlight the specific element.
-                    element.classList.add('shadow-highlight');
-
-                } else {
-                    // Case 1: In the main DOM. Highlight the element.
-                    element.classList.add('outline-highlight');
-                }
+                let element = getElementFromNode(range.commonAncestorContainer);
+                element.style.outline = '3px solid #6366f1'; // Tailwind's sapphire-500
+                element.style.outlineOffset = '4px';
+                highlightedElements.add(element);
             }
         });
     </script>

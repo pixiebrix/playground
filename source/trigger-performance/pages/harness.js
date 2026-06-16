@@ -51,6 +51,7 @@
   const timers = new Set(); // intervals registered via PBX.every / PBX.frame
   const rafs = new Set(); // rAF ids registered via PBX.raf
   let watcherObservers = []; // MutationObservers returned by initialize()
+  let activePage = null; // the page def passed to PBX.page()
 
   // ---- tiny URL-param layer -------------------------------------------------
   const search = new URLSearchParams(location.search);
@@ -288,6 +289,8 @@
 
   function stopWorkload() {
     stats.running = false;
+    // Let the page tear down its own loop (e.g. a React render driver) first.
+    if (activePage && activePage.stop) activePage.stop(activePage.root, activePage.params);
     timers.forEach(clearInterval);
     timers.clear();
     rafs.forEach((id) => cancelAnimationFrame(id));
@@ -380,6 +383,7 @@
       def.params = params;
 
       const boot = () => {
+        activePage = def;
         const root = document.createElement("div");
         root.id = "pbx-root";
         document.body.appendChild(root);

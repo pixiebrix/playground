@@ -14,8 +14,8 @@ npm install
 rm -rf "$PROJECT_DIST"
 mkdir -p "$PROJECT_DIST"
 
-# Static demo pages + harness
-cp pages/* "$PROJECT_DIST"/
+# Static demo pages + harness (pages/react/*.html lands in <dist>/react/)
+cp -r pages/* "$PROJECT_DIST"/
 
 # Vendored real jQueryInitialize bundles (pre-3.2.6 + 3.2.6)
 node bundle.mjs "$PROJECT_DIST/vendor"

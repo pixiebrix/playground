@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance: mutation storm</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    #pbx-root { padding: 16px 20px; }
+    .storm-item {
+      display: inline-block; width: 60px; height: 18px; margin: 1px;
+      background: #e2e8f0; border-radius: 3px; font: 10px monospace; text-align: center;
+    }
+    .storm-item.hot { background: #fca5a5; }
+  </style>
+</head>
+<body>
+  <script src="harness.js"></script>
+  <script>
+    PBX.page({
+      title: "Mutation storm",
+      intro: `
+        <h1>Mutation storm</h1>
+        <p>A pool of <code>.storm-item</code> nodes is thrashed at a tunable rate —
+        attribute flips, node add/remove, or both. This stresses the watcher's
+        throttle and the <code>visibilitychange</code> pause from
+        <strong>PR #8170 (Tier 1)</strong>.</p>
+        <p><strong>Try it:</strong> set mode to <code>legacy</code>, push
+        <code>rate</code> to 2000+ and <code>nodes</code> to 20000, then Start.
+        Watch FPS collapse and scans/sec climb. Switch to <code>optimized</code> at
+        the same numbers — it stays responsive. Then <em>background the tab</em> in
+        optimized mode and confirm scans/sec drops to 0 (visibility pause).</p>
+        <p>Target selector for a real trigger/button mod: <code>.storm-item</code></p>`,
+      selectors: [".storm-item"],
+      tunables: [
+        { key: "rate", label: "Mutations / sec", def: 240, min: 1, max: 8000 },
+        { key: "nodes", label: "Live node pool", def: 3000, min: 10, max: 60000 },
+        { key: "mode", label: "Mutation mode", def: "mixed", options: ["attr", "node", "mixed"] },
+      ],
+      build(root, p) {
+        for (let i = 0; i < p.nodes; i++) {
+          const d = document.createElement("div");
+          d.className = "storm-item";
+          d.textContent = i;
+          root.appendChild(d);
+        }
+      },
+      start(root, p) {
+        let n = 0;
+        const perFrame = Math.max(1, Math.round(p.rate / 60));
+        PBX.frame(() => {
+          const items = root.children;
+          for (let i = 0; i < perFrame; i++) {
+            const idx = (Math.random() * items.length) | 0;
+            const el = items[idx];
+            if (!el) continue;
+            const mode = p.mode === "mixed" ? (n & 1 ? "attr" : "node") : p.mode;
+            if (mode === "attr") {
+              el.classList.toggle("hot");
+              el.id = "s" + (n % 997); // id churn -> exercises id token index
+              el.setAttribute("data-v", n); // ignored by optimized attributeFilter
+            } else {
+              el.remove();
+              const d = document.createElement("div");
+              d.className = "storm-item";
+              d.textContent = n;
+              root.appendChild(d);
+            }
+            n++;
+          }
+        });
+      },
+    });
+  </script>
+</body>
+</html>

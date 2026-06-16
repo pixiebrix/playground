@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance: deep DOM</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    #pbx-root { padding: 16px 20px; }
+    #tree { font: 10px monospace; }
+    #tree .wrapper { padding-left: 4px; border-left: 1px solid #e2e8f0; }
+    .deep-target { color: #7c3aed; }
+    #stats-note { font: 12px monospace; color: #475569; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+  <script src="harness.js"></script>
+  <script>
+    PBX.page({
+      title: "Deep / large static DOM",
+      intro: `
+        <h1>Deep / large static DOM</h1>
+        <p>Builds one very large, deeply nested tree with <code>.deep-target</code>
+        leaves, then makes small mutations that each trigger a full-document
+        <code>querySelectorAll</code> for the complex selector
+        <code>.wrapper .deep-target</code>. The cost of every scan scales with total
+        DOM size — this is what makes the safety-net scan expensive and why the token
+        index and trailing-only throttle matter.</p>
+        <p><strong>Try it:</strong> raise <code>depth</code>/<code>breadth</code> to
+        build a 100k+ node tree (reload to rebuild), then in <code>legacy</code> mode a
+        few mutations per second are enough to push last-scan-ms into the tens of
+        milliseconds and stutter the page.</p>
+        <p>Target selector for a real mod: <code>.wrapper .deep-target</code></p>`,
+      selectors: [".wrapper .deep-target"],
+      tunables: [
+        { key: "depth", label: "Nesting depth (reload)", def: 12, min: 1, max: 40 },
+        { key: "breadth", label: "Children per level (reload)", def: 3, min: 1, max: 12 },
+        { key: "rate", label: "Mutations / sec", def: 20, min: 1, max: 2000 },
+      ],
+      build(root, p) {
+        const note = document.createElement("div");
+        note.id = "stats-note";
+        const tree = document.createElement("div");
+        tree.id = "tree";
+        root.append(note, tree);
+        let count = 0;
+        const cap = 150000; // guard so a typo can't hang the build itself
+        (function grow(parent, level) {
+          if (level >= p.depth || count >= cap) {
+            const leaf = document.createElement("span");
+            leaf.className = "deep-target";
+            leaf.textContent = "•";
+            parent.appendChild(leaf);
+            count++;
+            return;
+          }
+          for (let i = 0; i < p.breadth && count < cap; i++) {
+            const w = document.createElement("div");
+            w.className = "wrapper";
+            parent.appendChild(w);
+            count++;
+            grow(w, level + 1);
+          }
+        })(tree, 0);
+        note.textContent = `Built ${count.toLocaleString()} nodes (depth ${p.depth}, breadth ${p.breadth}).`;
+        root._tree = tree;
+      },
+      start(root, p) {
+        const tree = root._tree;
+        const targets = tree.querySelectorAll(".deep-target");
+        PBX.every(1000 / p.rate, () => {
+          // a single trivial mutation -> forces a full-document scan on trailing edge
+          const t = targets[(Math.random() * targets.length) | 0];
+          if (t) t.classList.toggle("deep-target-hot");
+        });
+      },
+    });
+  </script>
+</body>
+</html>

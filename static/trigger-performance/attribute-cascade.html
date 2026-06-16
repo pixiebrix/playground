@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance: attribute cascade</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    #pbx-root { padding: 16px 20px; }
+    .row { padding: 4px 8px; margin: 2px 0; border: 1px solid #e2e8f0; border-radius: 4px;
+      font: 12px monospace; }
+    .row.loaded { border-color: #16a34a; }
+    .row.loaded .field { background: #bbf7d0; }
+    .field { display: inline-block; min-width: 120px; padding: 1px 4px; background: #f1f5f9; }
+  </style>
+</head>
+<body>
+  <script src="harness.js"></script>
+  <script>
+    PBX.page({
+      title: "Attribute mutation cascade",
+      intro: `
+        <h1>Attribute mutation cascade</h1>
+        <p>Each row is inserted, then rapidly mutated: <code>value</code>,
+        <code>aria-label</code>, <code>data-state</code>, then a
+        <code>class="loaded"</code> flip on the parent. The watched selectors include
+        a <code>[data-testid="row"]</code> attribute selector and the ancestor-gated
+        <code>.loaded .field</code>. Exercises the narrow
+        <code>attributeFilter: ['id','class']</code> plus complex-selector fallback
+        from <strong>PR #8207 (Tier 2)</strong>.</p>
+        <p><strong>Try it:</strong> in <code>optimized</code> mode the
+        <code>data-*</code>/<code>aria-*</code> churn is filtered out (cheap) while the
+        <code>id</code>/<code>class</code> flips still match; in <code>legacy</code>
+        every attribute mutation on every node wakes the observer.</p>
+        <p>Targets: <code>[data-testid="row"]</code>, <code>.loaded .field</code></p>`,
+      selectors: ['[data-testid="row"]', ".loaded .field"],
+      tunables: [
+        { key: "rate", label: "Cascades / sec", def: 120, min: 1, max: 4000 },
+        { key: "nodes", label: "Row pool", def: 1500, min: 10, max: 40000 },
+      ],
+      build(root, p) {
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < p.nodes; i++) frag.appendChild(makeRow(i));
+        root.appendChild(frag);
+      },
+      start(root, p) {
+        let n = 0;
+        const perFrame = Math.max(1, Math.round(p.rate / 60));
+        PBX.frame(() => {
+          const rows = root.children;
+          for (let i = 0; i < perFrame; i++) {
+            const row = rows[(Math.random() * rows.length) | 0];
+            if (!row) continue;
+            const field = row.querySelector(".field");
+            // attribute churn the optimized filter should largely ignore...
+            field.setAttribute("value", "v" + n);
+            field.setAttribute("aria-label", "field " + n);
+            row.setAttribute("data-state", n & 1 ? "pending" : "ok");
+            // ...then the id/class flip the watcher does care about
+            row.classList.toggle("loaded");
+            n++;
+          }
+        });
+      },
+    });
+
+    function makeRow(i) {
+      const row = document.createElement("div");
+      row.className = "row";
+      row.setAttribute("data-testid", "row");
+      row.innerHTML = '<span class="field" value="init">row ' + i + "</span>";
+      return row;
+    }
+  </script>
+</body>
+</html>

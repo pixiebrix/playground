@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance: many selectors</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    #pbx-root { padding: 16px 20px; }
+    .target { display: inline-block; width: 70px; height: 16px; margin: 1px;
+      background: #e2e8f0; border-radius: 3px; font: 9px monospace; text-align: center; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <script src="harness.js"></script>
+  <script>
+    // The number of distinct selectors is itself a tunable, so read it up front
+    // and generate one class selector per watched mod.
+    const N = Math.max(1, Number(new URLSearchParams(location.search).get("selectors")) || 200);
+    const SELECTORS = Array.from({ length: N }, (_, i) => ".sel-" + i);
+
+    PBX.page({
+      title: "Many selectors / many observers",
+      intro: `
+        <h1>Many selectors / many observers</h1>
+        <p>Watches <strong>${N}</strong> distinct <code>.sel-N</code> selectors at once
+        — the multi-mod case. In <code>legacy</code> mode that is ${N} independent
+        MutationObservers each running a full-document scan per batch (O(N²)); in
+        <code>optimized</code> it is one shared observer with an id/class
+        <em>token index</em> for O(1) dispatch. Exercises
+        <strong>PR #8207 (Tier 2)</strong>.</p>
+        <p><strong>Try it:</strong> bump <code>selectors</code> to 1000+ via the field
+        below (it reloads with the new count), set <code>legacy</code>, Start, and
+        watch scans/sec explode while FPS tanks. Optimized stays flat.</p>
+        <p>Targets: <code>.sel-0</code> … <code>.sel-${N - 1}</code></p>`,
+      selectors: SELECTORS,
+      tunables: [
+        { key: "selectors", label: "Distinct selectors (reload)", def: 200, min: 1, max: 5000 },
+        { key: "churn", label: "New matches / sec", def: 200, min: 1, max: 8000 },
+      ],
+      build(root, p) {
+        // One initial element per selector class.
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < N; i++) {
+          const d = document.createElement("div");
+          d.className = "target sel-" + i;
+          d.textContent = i;
+          frag.appendChild(d);
+        }
+        root.appendChild(frag);
+      },
+      start(root, p) {
+        let n = 0;
+        const perFrame = Math.max(1, Math.round(p.churn / 60));
+        PBX.frame(() => {
+          for (let i = 0; i < perFrame; i++) {
+            // Append a fresh node matching a rotating selector -> every observer
+            // in legacy mode wakes up and re-scans the whole document.
+            const k = n % N;
+            const d = document.createElement("div");
+            d.className = "target sel-" + k;
+            d.textContent = "+" + n;
+            root.appendChild(d);
+            // keep the DOM from growing without bound
+            if (root.children.length > N * 4) root.firstChild.remove();
+            n++;
+          }
+        });
+      },
+    });
+  </script>
+</body>
+</html>

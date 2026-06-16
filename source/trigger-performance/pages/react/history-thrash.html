@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance (React): history thrash</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    #pbx-root { padding: 16px 20px; }
+    .url-note { font: 12px monospace; color: #475569; margin-bottom: 8px; }
+    .panel { columns: 6; column-gap: 4px; }
+    .pii, .filler { display: inline-block; width: 100%; height: 12px; margin: 1px 0;
+      border-radius: 2px; background: #f1f5f9; }
+    .route-active .pii { background: #fde68a; }
+  </style>
+</head>
+<body>
+  <script src="../vendor/jqi-old.js"></script>
+  <script src="../vendor/jqi-new.js"></script>
+  <script src="../harness.js"></script>
+  <script src="./history-thrash.js"></script>
+</body>
+</html>

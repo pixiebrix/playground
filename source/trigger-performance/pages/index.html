@@ -165,6 +165,39 @@
     </tbody>
   </table>
 
+  <h2 style="font-size:18px;margin:26px 0 4px">React ports — adversarial cases</h2>
+  <p class="sub" style="margin-top:0">The "optimized still degrades" cases above, driven through
+    real React commits (memoized static trees, ref-based animation, <code>setState</code>
+    reconciliation) — the way these patterns occur in customer apps.</p>
+  <table>
+    <thead>
+      <tr><th>Scenario</th><th>What React does</th><th>Target selector</th><th>Defeats</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="react/has-sweep.html">react / has-sweep</a></td>
+        <td><code>setState</code> toggles <code>.active</code> on a large grid; <code>:has()</code>
+          selector forces a full-document Sizzle scan per window</td>
+        <td><code>.card:has(.badge.active)</code></td>
+        <td class="pr">#8207 token index<br>(complex fallback)</td>
+      </tr>
+      <tr>
+        <td><a href="react/history-thrash.html">react / history-thrash</a></td>
+        <td>Memoized static tree; URL synced per frame → unthrottled full-document sweep.
+          <strong>Worse than legacy</strong></td>
+        <td><code>.route-active .pii</code></td>
+        <td class="pr">#8202 T1S<br>route re-sweep</td>
+      </tr>
+      <tr>
+        <td><a href="react/attr-escalation.html">react / attr-escalation</a></td>
+        <td>Ref-based per-frame <code>style</code> animation; one <code>[data-state]</code> mod
+          escalates the shared observer to <code>attributes:true</code></td>
+        <td><code>.benign-item</code> + <code>[data-state="open"]</code></td>
+        <td class="pr">#8207 T2<br>attributeFilter</td>
+      </tr>
+    </tbody>
+  </table>
+
   <p style="font-size:13px;color:#64748b">Every knob lives in the URL — a crashing
     configuration is a shareable link, e.g.
     <code>mutation-storm.html?harness=legacy&amp;rate=2000&amp;nodes=20000&amp;autostart=1</code>.</p>

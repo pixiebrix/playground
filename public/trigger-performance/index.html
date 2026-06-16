@@ -94,6 +94,42 @@
     </tbody>
   </table>
 
+  <h2 style="font-size:18px;margin:26px 0 4px">React ports</h2>
+  <p class="sub" style="margin-top:0">The same patterns driven by <strong>real React /
+    <code>react-router-dom</code></strong>, so the watcher runs against genuine React
+    commits — the way these cases occur in customer apps.</p>
+  <table>
+    <thead>
+      <tr><th>Scenario</th><th>What React does</th><th>Target selector</th><th>PR / tier</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="react/render-storm.html">react / render-storm</a></td>
+        <td>Rapid <code>setState</code> → reconciliation churn (remount or in-place patch)</td>
+        <td><code>.storm-item</code></td>
+        <td class="pr">#8170 T1</td>
+      </tr>
+      <tr>
+        <td><a href="react/route-swap.html">react / route-swap</a></td>
+        <td>react-router navigation mounts/unmounts a large route subtree in one commit</td>
+        <td><code>.route-active .pii</code></td>
+        <td class="pr">#8170 burst<br>#8202 re-sweep</td>
+      </tr>
+      <tr>
+        <td><a href="react/infinite-scroll.html">react / infinite-scroll</a></td>
+        <td>Growing list reconciled on each burst; unbounded with <code>keep=0</code></td>
+        <td><code>.feed-row</code></td>
+        <td class="pr">#8170 rIC flush</td>
+      </tr>
+      <tr>
+        <td><a href="react/portal-churn.html">react / portal-churn</a></td>
+        <td><code>createPortal</code> subtree mounted/unmounted rapidly (modal/tooltip)</td>
+        <td><code>.portal-content</code></td>
+        <td class="pr">#8170 add/remove</td>
+      </tr>
+    </tbody>
+  </table>
+
   <p style="font-size:13px;color:#64748b">Every knob lives in the URL — a crashing
     configuration is a shareable link, e.g.
     <code>mutation-storm.html?harness=legacy&amp;rate=2000&amp;nodes=20000&amp;autostart=1</code>.</p>

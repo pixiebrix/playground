@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance (React): route swap</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    #pbx-root { padding: 16px 20px; }
+    .rs-btn { padding: 6px 12px; margin: 0 0 12px; cursor: pointer;
+      border: 1px solid #2563eb; background: #2563eb; color: #fff; border-radius: 4px; font: inherit; }
+    .route-status { font: 12px monospace; color: #475569; margin-bottom: 10px; }
+    .pii { display: inline-block; width: 90px; height: 16px; margin: 1px;
+      background: #cbd5e1; border-radius: 3px; }
+    .route-active .pii { background: #fca5a5; } /* ancestor-gated mask target */
+    .filler { display: inline-block; width: 90px; height: 16px; margin: 1px; background: #f1f5f9; }
+  </style>
+</head>
+<body>
+  <script src="../vendor/jqi-old.js"></script>
+  <script src="../vendor/jqi-new.js"></script>
+  <script src="../harness.js"></script>
+  <script src="./route-swap.js"></script>
+</body>
+</html>

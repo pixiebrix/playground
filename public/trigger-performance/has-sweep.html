@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance: :has sweep amplifier</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    #pbx-root { padding: 16px 20px; }
+    .grid { display: flex; flex-wrap: wrap; gap: 2px; }
+    .card { width: 22px; height: 22px; box-sizing: border-box; border: 1px solid #e2e8f0;
+      border-radius: 3px; position: relative; }
+    .card.active { border-color: #16a34a; }
+    .card .badge { position: absolute; inset: 4px; border-radius: 2px; background: #f1f5f9; }
+    .card .badge.active { background: #bbf7d0; }
+    .card img { width: 0; height: 0; }
+  </style>
+</head>
+<body>
+  <script src="vendor/jqi-old.js"></script>
+  <script src="vendor/jqi-new.js"></script>
+  <script src="harness.js"></script>
+  <script>
+    // Selector is chosen by URL param so a crashing config is shareable, and so the
+    // three "shapes" can be compared on the IDENTICAL workload (see ?sel= below).
+    const SEL_MODE = new URLSearchParams(location.search).get("sel") || "has";
+    const SELECTORS = {
+      // :has() is a PSEUDO token -> grok() flags it complex -> token index can't
+      // classify it -> complex-fallback bucket -> woken on EVERY batch AND the
+      // 100ms trailing sweep runs a full-document $safeFind(':has(...)'), which
+      // Sizzle evaluates ~O(nodes x candidates). This is the case the token index
+      // (PR #8207) structurally cannot dodge.
+      has: ".card:has(.badge.active)",
+      // Compound class — NOT indexable either (parseSelector only matches a single
+      // `.token`), so it also lands in complex-fallback. But its sweep is a cheap
+      // native-ish querySelectorAll, so the per-window cost is far lower than :has.
+      compound: ".card.active",
+      // Pure single class — the ONLY shape the token index accelerates. Sweeps are
+      // trivial and most batches skip the subscriber entirely.
+      single: ".active",
+    };
+    const SELECTOR = SELECTORS[SEL_MODE] || SELECTORS.has;
+
+    PBX.page({
+      title: ":has() sweep amplifier",
+      intro: `
+        <h1>:has() sweep amplifier</h1>
+        <p>A large, <strong>static</strong> grid of <code>.card</code> elements (each with an
+        <code>img</code> + <code>.badge</code>). The page's own work is trivial: a handful of
+        <code>.active</code> class toggles per second. On its own it is perfectly smooth — nothing
+        on the page ever runs a <code>:has()</code> query.</p>
+        <p>The damage is entirely in the <em>watched selector</em>. With <code>sel=has</code> the
+        trigger watches <code>.card:has(.badge.active)</code>. That selector contains a
+        <code>:has()</code> pseudo, so it is classified <em>complex</em> — the
+        <strong>token index (PR #8207)</strong> can't fast-path it, and every ~100ms trailing
+        safety-net sweep runs a <strong>full-document</strong>
+        <code>$safeFind('.card:has(.badge.active)')</code> through Sizzle. Each light class toggle
+        re-arms that sweep. <strong>optimized stays slow</strong> here — the cost is the scan
+        itself, which neither the throttle nor the token index can remove.</p>
+        <p><strong>Try it:</strong> with <code>sel=has</code>, raise <code>cards</code> to 20000+
+        and watch max-task / long-tasks climb in <em>both</em> legacy and optimized. Then flip
+        <code>sel</code> to <code>compound</code> (same workload, cheap sweep) and
+        <code>single</code> (token-indexed, near-zero) to see the watcher cost collapse while the
+        page's own work is unchanged.</p>
+        <p>Watched selector (<code>sel=${escapeAttr(SEL_MODE)}</code>): <code>${escapeAttr(SELECTOR)}</code></p>`,
+      selectors: [SELECTOR],
+      tunables: [
+        { key: "sel", label: "Watched selector shape (reload)", def: "has",
+          options: ["has", "compound", "single"] },
+        { key: "cards", label: "Card count (reload)", def: 12000, min: 100, max: 80000 },
+        { key: "rate", label: "Class toggles / sec", def: 10, min: 1, max: 2000 },
+      ],
+      build(root, p) {
+        const grid = document.createElement("div");
+        grid.className = "grid";
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < p.cards; i++) {
+          const card = document.createElement("div");
+          card.className = "card";
+          // An <img> + .badge per card: realistic card markup and more nodes for
+          // Sizzle's :has() to walk per candidate.
+          const img = document.createElement("img");
+          const badge = document.createElement("span");
+          badge.className = "badge";
+          card.append(img, badge);
+          frag.appendChild(card);
+        }
+        grid.appendChild(frag);
+        root.appendChild(grid);
+        root._cards = grid.children;
+      },
+      start(root, p) {
+        const cards = root._cards;
+        PBX.every(1000 / p.rate, () => {
+          const card = cards[(Math.random() * cards.length) | 0];
+          if (!card) return;
+          // Toggle .active on BOTH the card and its badge so the workload is
+          // identical across all three sel= shapes — only the watched selector
+          // (and therefore the sweep cost) changes between runs.
+          card.classList.toggle("active");
+          card.querySelector(".badge").classList.toggle("active");
+        });
+      },
+    });
+
+    function escapeAttr(s) {
+      return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    }
+  </script>
+</body>
+</html>

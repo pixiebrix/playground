@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance: attribute-mode escalation</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    #pbx-root { padding: 16px 20px; }
+    .grid { display: flex; flex-wrap: wrap; gap: 1px; }
+    .benign-item { width: 10px; height: 10px; background: #c7d2fe; border-radius: 2px;
+      will-change: transform; }
+  </style>
+</head>
+<body>
+  <script src="vendor/jqi-old.js"></script>
+  <script src="vendor/jqi-new.js"></script>
+  <script src="harness.js"></script>
+  <script>
+    // The "poison" selector is added (or not) via URL param so you can flip a SINGLE
+    // co-installed mod on/off and watch it change the cost for the WHOLE page.
+    const POISON = (new URLSearchParams(location.search).get("poison") || "1") === "1";
+    // Benign mod: a pure single class -> token-indexed, attributeMode "none".
+    // Poison mod: an attribute predicate other than id/class -> grok() sets
+    // hasAttrToken -> attributeMode "full". Because the shared MutationObserver
+    // (PR #8207) observes the UNION of every subscriber's mode, this one selector
+    // escalates the whole-document observer from "no attribute observation" to
+    // unfiltered `attributes: true`, defeating the narrow id/class filter for
+    // every other mod on the page.
+    const SELECTORS = POISON ? [".benign-item", '[data-state="open"]'] : [".benign-item"];
+
+    PBX.page({
+      title: "Attribute-mode escalation",
+      intro: `
+        <h1>Attribute-mode escalation (one selector poisons the document)</h1>
+        <p>A pool of <code>.benign-item</code> nodes whose inline <code>style.transform</code> is
+        rewritten every frame — an ordinary JS-driven animation (parallax, progress bars, sticky
+        headers). It performs <strong>zero node add/removes</strong>; all it does is churn the
+        <code>style</code> attribute. A trigger watching the pure class
+        <code>.benign-item</code> is token-indexed and asks for <code>attributeMode: "none"</code>,
+        so the shared observer doesn't observe attributes at all — the animation is invisible to
+        the watcher and costs nothing.</p>
+        <p>Now add <strong>one</strong> unrelated mod whose selector is an attribute predicate —
+        <code>[data-state="open"]</code> (<code>poison=1</code>, the default). It forces
+        <code>attributeMode: "full"</code>, and because the document's observer is
+        <strong>shared</strong> (PR #8207), that escalates it to unfiltered
+        <code>attributes: true</code> for <em>everyone</em>. Every <code>style</code> write on
+        every frame now wakes the shared observer and the complex
+        <code>[data-state="open"]</code> subscriber re-arms a full-document sweep — even though the
+        churning attribute (<code>style</code>) has nothing to do with the selector
+        (<code>data-state</code>). The narrow id/class filter that made this page free is gone.</p>
+        <p><strong>Try it:</strong> with <code>poison=1</code> set mode <code>optimized</code>,
+        <code>rate</code> 1800, <code>nodes</code> 6000, Start — long-tasks appear. Flip
+        <code>poison=0</code> (remove the one attribute selector, nothing else changes) and the
+        same workload drops to ~idle: the observer goes back to <code>"none"</code> and never sees
+        the style churn. Legacy gives each mod its own observer, so the benign mod is never
+        poisoned there — the escalation is specific to the shared-observer design.</p>
+        <p>Watched selector(s): <code>${SELECTORS.map(escapeAttr).join("</code>, <code>")}</code></p>`,
+      selectors: SELECTORS,
+      tunables: [
+        { key: "poison", label: "Include [data-state] mod (reload)", def: "1", options: ["1", "0"] },
+        { key: "attr", label: "Churned attribute", def: "style",
+          options: ["style", "aria", "data", "mixed"] },
+        { key: "nodes", label: "Animated node pool", def: 6000, min: 10, max: 60000 },
+        { key: "rate", label: "Attribute writes / sec", def: 1800, min: 1, max: 12000 },
+      ],
+      build(root, p) {
+        const grid = document.createElement("div");
+        grid.className = "grid";
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < p.nodes; i++) {
+          const d = document.createElement("div");
+          d.className = "benign-item";
+          frag.appendChild(d);
+        }
+        grid.appendChild(frag);
+        root.appendChild(grid);
+        root._items = grid.children;
+      },
+      start(root, p) {
+        const items = root._items;
+        let n = 0;
+        const perFrame = Math.max(1, Math.round(p.rate / 60));
+        PBX.frame(() => {
+          for (let i = 0; i < perFrame; i++) {
+            const el = items[(Math.random() * items.length) | 0];
+            if (!el) continue;
+            const mode = p.attr === "mixed" ? ["style", "aria", "data"][n % 3] : p.attr;
+            if (mode === "style") {
+              // Legitimate animation: never observed under the id/class filter,
+              // flooded once the observer escalates to full.
+              el.style.transform = "translateX(" + (n % 7) + "px)";
+            } else if (mode === "aria") {
+              el.setAttribute("aria-valuenow", String(n % 100));
+            } else {
+              el.setAttribute("data-tick", String(n));
+            }
+            n++;
+          }
+        });
+      },
+    });
+
+    function escapeAttr(s) {
+      return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    }
+  </script>
+</body>
+</html>

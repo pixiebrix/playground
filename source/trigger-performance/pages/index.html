@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance — jQueryInitialize stress demos</title>
+  <style>
+    body { font-family: system-ui, sans-serif; line-height: 1.5; color: #1e293b;
+      max-width: 900px; margin: 0 auto; padding: 24px; }
+    h1 { font-size: 26px; margin-bottom: 4px; }
+    .sub { color: #64748b; margin-top: 0; }
+    code { background: #f1f5f9; padding: 1px 5px; border-radius: 3px;
+      font: 12px ui-monospace, monospace; color: #7c3aed; }
+    table { border-collapse: collapse; width: 100%; margin: 18px 0; font-size: 14px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+    th { background: #f8fafc; font-size: 12px; text-transform: uppercase; letter-spacing: .03em; color: #475569; }
+    td a { font-weight: 600; color: #2563eb; text-decoration: none; }
+    td a:hover { text-decoration: underline; }
+    .pr { font: 11px ui-monospace, monospace; color: #64748b; white-space: nowrap; }
+    .note { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; }
+    .modes b { display: inline-block; min-width: 78px; }
+  </style>
+</head>
+<body>
+  <h1>⚡ trigger-performance</h1>
+  <p class="sub">Pathological DOM patterns for PixieBrix's <code>jQueryInitialize</code>
+    selector watcher — the shared MutationObserver behind <strong>both</strong> trigger
+    and button starter bricks — reworked in the <strong>3.2.6</strong> milestone.</p>
+
+  <div class="note">
+    <p style="margin-top:0"><strong>Why this exists.</strong> 3.2.6 shipped a series of
+    performance overhauls to the watcher. A customer reported the changes made some pages
+    crash. These pages reproduce the cases the work targeted, so each can be observed —
+    and the old vs new watcher behavior compared — on the same DOM.</p>
+    <p style="margin-bottom:0" class="modes"><strong>Two ways to use each page:</strong><br>
+      1. <em>With the extension</em> — install a real trigger/button mod against the
+         listed selector and load the page.<br>
+      2. <em>Without it</em> — use the built-in harness panel (top-right). It runs the
+         <strong>real, vendored <code>jQueryInitialize</code></strong> (bundled from
+         <code>pixiebrix-source</code>; see <code>source/trigger-performance/vendor</code>)
+         and reports FPS, long-tasks/sec, max task time, and callback matches. Switch
+         the watcher mode to compare the actual code paths:<br>
+      &nbsp;&nbsp;<b>off</b> baseline · <b>legacy</b> real pre-3.2.6 ·
+      <b>optimized</b> real 3.2.6.</p>
+  </div>
+
+  <table>
+    <thead>
+      <tr><th>Scenario</th><th>Pathological pattern</th><th>Target selector</th><th>PR / tier</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><a href="mutation-storm.html">mutation-storm</a></td>
+        <td>High-rate attribute thrash + node add/remove; background-tab scanning</td>
+        <td><code>.storm-item</code></td>
+        <td class="pr">#8170 T1<br>throttle, visibility</td>
+      </tr>
+      <tr>
+        <td><a href="route-swap.html">route-swap</a></td>
+        <td>SPA route change replacing 500+ siblings at once; ancestor-gated masking targets</td>
+        <td><code>body.route-active .pii</code></td>
+        <td class="pr">#8170 burst<br>#8202 T1S re-sweep</td>
+      </tr>
+      <tr>
+        <td><a href="infinite-scroll-burst.html">infinite-scroll-burst</a></td>
+        <td>Large burst appends on a timer; unbounded growth → memory pressure</td>
+        <td><code>.feed-row</code></td>
+        <td class="pr">#8170 T1<br>rIC burst flush</td>
+      </tr>
+      <tr>
+        <td><a href="many-selectors.html">many-selectors</a></td>
+        <td>Hundreds–thousands of watched selectors / observers at once (O(N²) legacy)</td>
+        <td><code>.sel-0</code> … <code>.sel-N</code></td>
+        <td class="pr">#8207 T2<br>token index</td>
+      </tr>
+      <tr>
+        <td><a href="attribute-cascade.html">attribute-cascade</a></td>
+        <td>Insert then mutate <code>value</code>/<code>aria-*</code>/<code>data-*</code> + <code>id</code>/<code>class</code></td>
+        <td><code>[data-testid="row"]</code>, <code>.loaded .field</code></td>
+        <td class="pr">#8207 T2<br>attributeFilter</td>
+      </tr>
+      <tr>
+        <td><a href="detached-subtree.html">detached-subtree</a></td>
+        <td>Add-then-remove subtree in one task (React portal / failed diff)</td>
+        <td><code>.portal-content</code></td>
+        <td class="pr">#8170 T1<br>isConnected skip</td>
+      </tr>
+      <tr>
+        <td><a href="deep-dom.html">deep-dom</a></td>
+        <td>Very large / deeply nested DOM; expensive full-document scans</td>
+        <td><code>.wrapper .deep-target</code></td>
+        <td class="pr">scan cost<br>(optional)</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:13px;color:#64748b">Every knob lives in the URL — a crashing
+    configuration is a shareable link, e.g.
+    <code>mutation-storm.html?harness=legacy&amp;rate=2000&amp;nodes=20000&amp;autostart=1</code>.</p>
+</body>
+</html>

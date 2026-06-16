@@ -1,0 +1,19 @@
+{
+  "name": "trigger-performance",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Stress demos that run the real vendored jQueryInitialize (pre/post 3.2.6) against pathological DOM patterns",
+  "scripts": {
+    "build": "node bundle.mjs"
+  },
+  "dependencies": {
+    "abort-utils": "3.0.0",
+    "jquery": "3.7.1",
+    "lodash-es": "4.17.21",
+    "simple-event-target": "2.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.28.1"
+  }
+}

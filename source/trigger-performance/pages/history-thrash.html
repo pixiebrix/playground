@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance: history thrash</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    #pbx-root { padding: 16px 20px; }
+    #url-note { font: 12px monospace; color: #475569; margin-bottom: 8px; word-break: break-all; }
+    .panel { columns: 6; column-gap: 4px; }
+    .pii, .filler { display: inline-block; width: 100%; height: 12px; margin: 1px 0;
+      border-radius: 2px; background: #f1f5f9; }
+    .route-active .pii { background: #fde68a; }
+  </style>
+</head>
+<body>
+  <script src="vendor/jqi-old.js"></script>
+  <script src="vendor/jqi-new.js"></script>
+  <script src="harness.js"></script>
+  <script>
+    PBX.page({
+      title: "History / URL thrash",
+      intro: `
+        <h1>History / URL thrash</h1>
+        <p>A large but <strong>static</strong> DOM that performs <strong>no node or attribute
+        mutations at all</strong>. The only thing it does is sync a counter into the URL on a
+        timer — the everyday "store scroll position / active filter in the URL" pattern
+        (<code>history.replaceState</code> on scroll or input). The page itself is completely
+        idle after build.</p>
+        <p>This is the one scenario where <strong>optimized is <em>worse</em> than legacy</strong>.
+        A pure URL change fires no DOM mutation, so the pre-3.2.6 watcher never wakes — it does
+        zero work here. But the <strong>route-change re-sweep (PR #8202, Tier 1S)</strong>
+        subscribes to <code>navigatesuccess</code>/<code>popstate</code>/<code>hashchange</code> and
+        schedules a <strong>full-document <code>$safeFind</code> in a bare
+        <code>requestAnimationFrame</code></strong> on every URL change —
+        <em>bypassing the 100ms throttle and the <code>requestIdleCallback</code> wrap entirely</em>
+        (see <code>onRouteChange</code> in <code>jQueryInitialize</code>). One unique URL per frame →
+        one full-document scan per frame for the ancestor-gated masking selector
+        <code>.route-active .pii</code>.</p>
+        <p><strong>Try it:</strong> set mode <code>optimized</code>, <code>rate</code> 60,
+        <code>nodes</code> 40000, Start — watch long-tasks/sec and max-task climb with the page
+        doing nothing else. Switch to <code>legacy</code> or <code>off</code> at the same numbers:
+        flat. (<code>via=replaceState</code> relies on Chrome's Navigation API; use
+        <code>via=hash</code> for a fallback that fires <code>hashchange</code> everywhere.)</p>
+        <p>Watched selector for a real mod: <code>.route-active .pii</code></p>`,
+      selectors: [".route-active .pii"],
+      tunables: [
+        { key: "nodes", label: "Static DOM size (reload)", def: 40000, min: 100, max: 200000 },
+        { key: "rate", label: "URL updates / sec", def: 60, min: 1, max: 240 },
+        { key: "via", label: "URL update method", def: "replaceState",
+          options: ["replaceState", "hash"] },
+      ],
+      build(root, p) {
+        const note = document.createElement("div");
+        note.id = "url-note";
+        const panel = document.createElement("div");
+        panel.className = "route-active panel";
+        const frag = document.createDocumentFragment();
+        for (let i = 0; i < p.nodes; i++) {
+          const d = document.createElement("div");
+          d.className = i % 4 === 0 ? "pii" : "filler";
+          frag.appendChild(d);
+        }
+        panel.appendChild(frag);
+        root.append(note, panel);
+        note.textContent = `Built ${p.nodes.toLocaleString()} static nodes (${Math.ceil(
+          p.nodes / 4
+        ).toLocaleString()} .pii). The DOM never changes after this — only the URL does.`;
+      },
+      start(root, p) {
+        let counter = 0;
+        PBX.every(1000 / p.rate, () => {
+          counter++;
+          // A unique fragment each tick so routeChange's same-URL dedup never
+          // short-circuits. No DOM mutation is performed — the route-change
+          // re-sweep is the ONLY thing that can wake the optimized watcher here.
+          if (p.via === "hash") {
+            // Fires hashchange in every browser (also adds history entries).
+            location.hash = "pos" + counter;
+          } else {
+            // Realistic scroll/filter-sync pattern: replaces (doesn't grow) the
+            // history entry. Detected via the Navigation API's navigatesuccess.
+            history.replaceState(null, "", "#pos=" + counter);
+          }
+        });
+      },
+    });
+  </script>
+</body>
+</html>

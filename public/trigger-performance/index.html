@@ -35,11 +35,13 @@
     <p style="margin-bottom:0" class="modes"><strong>Two ways to use each page:</strong><br>
       1. <em>With the extension</em> — install a real trigger/button mod against the
          listed selector and load the page.<br>
-      2. <em>Without it</em> — use the built-in harness panel (top-right). It mimics
-         <code>jQueryInitialize</code> and reports FPS, mutations/sec, scans/sec, and
-         scan time. Switch the watcher mode to compare:<br>
-      &nbsp;&nbsp;<b>off</b> baseline · <b>legacy</b> pre-3.2.6 (slow path) ·
-      <b>optimized</b> 3.2.6 (fast path).</p>
+      2. <em>Without it</em> — use the built-in harness panel (top-right). It runs the
+         <strong>real, vendored <code>jQueryInitialize</code></strong> (bundled from
+         <code>pixiebrix-source</code>; see <code>source/trigger-performance/vendor</code>)
+         and reports FPS, long-tasks/sec, max task time, and callback matches. Switch
+         the watcher mode to compare the actual code paths:<br>
+      &nbsp;&nbsp;<b>off</b> baseline · <b>legacy</b> real pre-3.2.6 ·
+      <b>optimized</b> real 3.2.6.</p>
   </div>
 
   <table>

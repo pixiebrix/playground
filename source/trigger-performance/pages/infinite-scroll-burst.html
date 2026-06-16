@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance: infinite scroll burst</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    #pbx-root { padding: 16px 20px; }
+    .scroll-container { border: 1px solid #cbd5e1; height: 420px; overflow-y: scroll; padding: 8px; }
+    .feed-row { border-bottom: 1px solid #e2e8f0; padding: 8px; font-size: 13px; }
+    .feed-row b { color: #2563eb; }
+  </style>
+</head>
+<body>
+  <script src="vendor/jqi-old.js"></script>
+  <script src="vendor/jqi-new.js"></script>
+  <script src="harness.js"></script>
+  <script>
+    PBX.page({
+      title: "Infinite-scroll burst",
+      intro: `
+        <h1>Infinite-scroll burst</h1>
+        <p>Appends <code>.feed-row</code> nodes in big bursts on a timer — the
+        Twitter / Reddit feed pattern. Set <code>keep</code> to 0 for unbounded
+        growth (memory pressure → the crash class). Exercises the
+        <strong>burst-size <code>requestIdleCallback</code> flush (PR #8170)</strong>.</p>
+        <p><strong>Try it:</strong> <code>burst</code> 1000, <code>interval</code> 200,
+        <code>keep</code> 0, mode <code>legacy</code>, Start — the page grows without
+        bound and scan time per batch keeps rising. In <code>optimized</code> the
+        oversized batches defer to idle time.</p>
+        <p>Target selector for a real mod: <code>.feed-row</code></p>`,
+      selectors: [".feed-row"],
+      tunables: [
+        { key: "burst", label: "Rows per burst", def: 400, min: 1, max: 10000 },
+        { key: "interval", label: "Burst every (ms)", def: 250, min: 16, max: 5000 },
+        { key: "keep", label: "Max rows (0 = unbounded)", def: 4000, min: 0, max: 200000 },
+      ],
+      build(root, p) {
+        const c = document.createElement("div");
+        c.className = "scroll-container";
+        c.id = "feed";
+        root.appendChild(c);
+      },
+      start(root, p) {
+        const feed = root.querySelector("#feed");
+        let n = 0;
+        PBX.every(p.interval, () => {
+          const frag = document.createDocumentFragment();
+          for (let i = 0; i < p.burst; i++) {
+            const row = document.createElement("div");
+            row.className = "feed-row";
+            row.innerHTML = "<b>#" + n++ + "</b> Lorem ipsum dolor sit amet, consectetur.";
+            frag.appendChild(row);
+          }
+          feed.appendChild(frag);
+          if (p.keep > 0) while (feed.children.length > p.keep) feed.firstChild.remove();
+          feed.scrollTop = feed.scrollHeight;
+        });
+      },
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance: detached subtree</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    #pbx-root { padding: 16px 20px; }
+    #stage { min-height: 60px; border: 1px dashed #cbd5e1; padding: 8px; font: 12px monospace; color: #475569; }
+    .portal-content { display: inline-block; padding: 2px 6px; margin: 1px; background: #ddd6fe; border-radius: 3px; }
+  </style>
+</head>
+<body>
+  <script src="vendor/jqi-old.js"></script>
+  <script src="vendor/jqi-new.js"></script>
+  <script src="harness.js"></script>
+  <script>
+    PBX.page({
+      title: "Detached subtree churn",
+      intro: `
+        <h1>Detached subtree churn</h1>
+        <p>Builds a subtree containing <code>.portal-content</code>, attaches it, then
+        removes it again in the same task — React's add-then-remove portal / failed-diff
+        pattern. The MutationObserver still fires, but the nodes never painted
+        (<code>isConnected === false</code>). Exercises the detached-subtree fast-path
+        from <strong>PR #8170 (Tier 1)</strong>.</p>
+        <p><strong>Try it:</strong> push <code>rate</code> high in <code>legacy</code>
+        mode — it runs <code>querySelectorAll</code> against subtrees the page never
+        showed (wasted scans, rising scan-ms). <code>optimized</code> skips disconnected
+        adds, so scans/sec stays near zero.</p>
+        <p>Target selector for a real mod: <code>.portal-content</code></p>`,
+      selectors: [".portal-content"],
+      tunables: [
+        { key: "rate", label: "Add/remove cycles / sec", def: 200, min: 1, max: 6000 },
+        { key: "size", label: "Nodes per subtree", def: 50, min: 1, max: 2000 },
+      ],
+      build(root, p) {
+        const stage = document.createElement("div");
+        stage.id = "stage";
+        stage.textContent = "Detached subtrees are attached + removed here within one task.";
+        root.appendChild(stage);
+      },
+      start(root, p) {
+        const stage = root.querySelector("#stage");
+        const perFrame = Math.max(1, Math.round(p.rate / 60));
+        PBX.frame(() => {
+          for (let i = 0; i < perFrame; i++) {
+            const sub = document.createElement("div");
+            for (let j = 0; j < p.size; j++) {
+              const c = document.createElement("span");
+              c.className = "portal-content";
+              c.textContent = ".";
+              sub.appendChild(c);
+            }
+            stage.appendChild(sub); // attach...
+            sub.remove(); // ...and detach before paint, same task
+          }
+        });
+      },
+    });
+  </script>
+</body>
+</html>

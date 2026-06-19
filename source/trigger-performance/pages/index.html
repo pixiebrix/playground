@@ -91,6 +91,12 @@
         <td><code>.wrapper .deep-target</code></td>
         <td class="pr">scan cost<br>(optional)</td>
       </tr>
+      <tr>
+        <td><a href="attribute-dedup.html">attribute-dedup</a></td>
+        <td>One stable node, attributes only churn (never added/removed) — dedup correctness, no perf stress</td>
+        <td><code>.dedup-target</code></td>
+        <td class="pr">#8313<br>one button / one fire</td>
+      </tr>
     </tbody>
   </table>
 
@@ -201,5 +207,27 @@
   <p style="font-size:13px;color:#64748b">Every knob lives in the URL — a crashing
     configuration is a shareable link, e.g.
     <code>mutation-storm.html?harness=legacy&amp;rate=2000&amp;nodes=20000&amp;autostart=1</code>.</p>
+
+  <h2 style="font-size:18px;margin:26px 0 4px">Driving these pages from automated tests</h2>
+  <div class="note">
+    <p style="margin-top:0">To exercise the <strong>real extension</strong> (not the in-page
+      vendored watcher) against a scenario, load it as a clean DOM target and let it run a bounded,
+      self-signalling workload:</p>
+    <ul style="margin:0 0 8px">
+      <li><code>harness=off&amp;panel=0</code> — no competing watcher, no fixed overlay/intro.</li>
+      <li><code>autostart=1</code> — start without clicking; <code>cycles=N</code> — stop after
+        exactly N workload ticks.</li>
+      <li>On completion: <code>&lt;html data-pbx-workload="done"&gt;</code> (lifecycle
+        <code>idle → running → done</code>) plus a <code>pbx:workload-done</code> event. Await that
+        instead of a timeout.</li>
+      <li>Generated nodes carry a stable <code>data-item</code> / <code>data-row</code> identity.</li>
+      <li>A mod reports work — counted on <code>window.PBX.observed</code> (<code>{ total, counts,
+        keys }</code>) — via page-world <code>window.PBX.record(name, key)</code> or by dispatching a
+        <code>pbx:record</code> DOM event on the matched element.</li>
+    </ul>
+    <p style="margin-bottom:0">e.g.
+      <code>infinite-scroll-burst.html?harness=off&amp;panel=0&amp;autostart=1&amp;burst=10&amp;cycles=5</code>
+      appends exactly 50 <code>.feed-row[data-row]</code> nodes, then signals done.</p>
+  </div>
 </body>
 </html>

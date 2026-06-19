@@ -50,6 +50,7 @@
           for (let i = 0; i < p.burst; i++) {
             const row = document.createElement("div");
             row.className = "feed-row";
+            row.dataset.row = n; // stable identity for "fired once per row" assertions
             row.innerHTML = "<b>#" + n++ + "</b> Lorem ipsum dolor sit amet, consectetur.";
             frag.appendChild(row);
           }

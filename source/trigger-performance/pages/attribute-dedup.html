@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>trigger-performance: attribute dedup</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 0; }
+    #pbx-root { padding: 16px 20px; }
+    .dedup-target {
+      display: inline-block; min-width: 220px; padding: 10px 14px; margin: 4px;
+      background: #e2e8f0; border-radius: 6px; font: 13px monospace; color: #1e293b;
+    }
+    .dedup-target.hot { background: #bbf7d0; }
+  </style>
+</head>
+<body>
+  <script src="vendor/jqi-old.js"></script>
+  <script src="vendor/jqi-new.js"></script>
+  <script src="harness.js"></script>
+  <script>
+    PBX.page({
+      title: "Attribute dedup",
+      intro: `
+        <h1>Attribute dedup (correctness, not perf)</h1>
+        <p>A <strong>single, stable</strong> <code>.dedup-target</code> element whose
+        <em>attributes</em> churn — <code>class</code>, <code>aria-expanded</code>,
+        <code>data-*</code>, <code>style</code> — but which is <strong>never added or
+        removed</strong>. Node identity is constant.</p>
+        <p>This is the deterministic dedup invariant behind issue
+        <strong>#8313</strong>, isolated from any performance stress: a correct
+        <em>button</em> starter brick must inject <strong>exactly one</strong> button
+        (not one per attribute mutation), and a correct <em>trigger</em> must fire
+        <strong>once</strong>, not on every observer callback.</p>
+        <p><strong>For automated tests</strong> load with
+        <code>?harness=off&amp;panel=0&amp;autostart=1&amp;cycles=120</code>: the page
+        flips attributes for exactly 120 ticks, then sets
+        <code>&lt;html data-pbx-workload="done"&gt;</code>. Then assert a single
+        injected button / a single <code>window.PBX.observed</code> fire for
+        <code>data-item="0"</code>.</p>
+        <p>Target selector for a real mod: <code>.dedup-target</code></p>`,
+      selectors: [".dedup-target"],
+      tunables: [
+        { key: "attrs", label: "Attr flips / sec", def: 240, min: 1, max: 8000 },
+      ],
+      build(root, p) {
+        const el = document.createElement("div");
+        el.className = "dedup-target";
+        el.dataset.item = "0"; // the one and only target
+        el.textContent = "single stable target";
+        root.appendChild(el);
+      },
+      start(root, p) {
+        const el = root.querySelector(".dedup-target");
+        const perFrame = Math.max(1, Math.round(p.attrs / 60));
+        let n = 0;
+        PBX.frame(() => {
+          for (let i = 0; i < perFrame; i++) {
+            el.classList.toggle("hot");
+            el.setAttribute("aria-expanded", n & 1 ? "true" : "false");
+            el.setAttribute("data-v", n); // ignored by optimized attributeFilter
+            el.style.opacity = n % 2 ? "0.99" : "1";
+            n++;
+          }
+        });
+      },
+    });
+  </script>
+</body>
+</html>

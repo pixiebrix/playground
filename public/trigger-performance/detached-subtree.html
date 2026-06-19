@@ -44,12 +44,14 @@
       start(root, p) {
         const stage = root.querySelector("#stage");
         const perFrame = Math.max(1, Math.round(p.rate / 60));
+        let n = 0;
         PBX.frame(() => {
           for (let i = 0; i < perFrame; i++) {
             const sub = document.createElement("div");
             for (let j = 0; j < p.size; j++) {
               const c = document.createElement("span");
               c.className = "portal-content";
+              c.dataset.item = n++; // stable identity (each churn cycle is a distinct node)
               c.textContent = ".";
               sub.appendChild(c);
             }

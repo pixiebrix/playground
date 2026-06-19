@@ -43,6 +43,7 @@
         for (let i = 0; i < p.nodes; i++) {
           const d = document.createElement("div");
           d.className = "storm-item";
+          d.dataset.item = i; // stable identity for test assertions / mod keying
           d.textContent = i;
           root.appendChild(d);
         }
@@ -65,6 +66,7 @@
               el.remove();
               const d = document.createElement("div");
               d.className = "storm-item";
+              d.dataset.item = n;
               d.textContent = n;
               root.appendChild(d);
             }

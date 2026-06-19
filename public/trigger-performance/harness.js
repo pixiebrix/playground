@@ -31,6 +31,28 @@
  *
  * Every config value lives in the URL query string, so a crashing setup is a
  * shareable link, e.g. mutation-storm.html?harness=legacy&rate=800&nodes=20000
+ *
+ * ---------------------------------------------------------------------------
+ * Automated-testing hooks (for driving these pages with the REAL extension)
+ * ---------------------------------------------------------------------------
+ * Load with `?harness=off&panel=0` to get a clean DOM target (no competing
+ * in-page watcher, no fixed overlay), then:
+ *
+ *   ?cycles=N    run exactly N workload ticks, then stop. On completion the
+ *                harness sets <html data-pbx-workload="done"> and fires a
+ *                `pbx:workload-done` event — await that instead of a timeout.
+ *                Lifecycle: data-pbx-workload = idle -> running -> done.
+ *   ?autostart=1 begin the workload without clicking Start.
+ *
+ * Generated nodes carry a stable identity (data-item / data-row) so a test can
+ * assert per-element behavior. A mod reports work two ways, both tallied on
+ * window.PBX.observed ({ total, counts, keys }):
+ *   - page-world:  window.PBX.record(name, key)
+ *   - isolated:    dispatch a `pbx:record` DOM event on the matched element
+ *                  (its data-item/data-row becomes the key)
+ *
+ * e.g. infinite-scroll-burst.html?harness=off&panel=0&autostart=1&burst=10&cycles=5
+ * appends exactly 50 .feed-row[data-row] nodes, then signals done.
  */
 (function () {
   "use strict";
@@ -48,10 +70,19 @@
   };
 
   let MODE = "optimized"; // off | legacy | optimized
+  let PANEL = true; // render the harness panel? panel=0 hides it (clean DOM target for extension E2E)
+  let CYCLES = 0; // stop after N workload ticks (0 = unbounded); makes runs deterministic for tests
+  let ticks = 0; // workload ticks elapsed in the current run
   const timers = new Set(); // intervals registered via PBX.every / PBX.frame
   const rafs = new Set(); // rAF ids registered via PBX.raf
   let watcherObservers = []; // MutationObservers returned by initialize()
   let activePage = null; // the page def passed to PBX.page()
+
+  // External observations, kept separate from the vendored-watcher `stats.matches`. When you drive
+  // a page with the *real extension* (harness=off), a mod feeds these — either from page-world JS
+  // via window.PBX.record(name, key), or by dispatching a `pbx:record` DOM event on the matched
+  // element (its data-item/data-row supplies the key). Lets a test assert e.g. "fired once per row".
+  const observed = { total: 0, counts: {}, keys: {} };
 
   // ---- tiny URL-param layer -------------------------------------------------
   const search = new URLSearchParams(location.search);
@@ -61,6 +92,24 @@
   function numParam(key, def) {
     const v = Number(rawParam(key));
     return Number.isFinite(v) && rawParam(key) !== null ? v : def;
+  }
+
+  // ---- deterministic run lifecycle (for automated tests) --------------------
+  // Reflected on <html data-pbx-workload> as idle -> running -> done so a test can await quiescence
+  // (expect(html).toHaveAttribute("data-pbx-workload", "done")) instead of guessing with timeouts.
+  function setWorkloadState(state) {
+    document.documentElement.setAttribute("data-pbx-workload", state);
+  }
+  function runSnapshot() {
+    return {
+      mode: MODE,
+      ticks,
+      fps: stats.fps,
+      matches: stats.matches,
+      domNodes: stats.domNodes,
+      observed: { total: observed.total, counts: { ...observed.counts } },
+      elapsedMs: stats.startedAt ? performance.now() - stats.startedAt : 0,
+    };
   }
 
   // =========================================================================
@@ -161,6 +210,7 @@
           <span>Long tasks / sec</span><b id="s-lt">0</b>
           <span>Max task (ms)</span><b id="s-mt">0</b>
           <span>Matches</span><b id="s-match">0</b>
+          <span>Observed (mod)</span><b id="s-obs">0</b>
           <span>DOM nodes</span><b id="s-dom">0</b>
           <span>Elapsed (s)</span><b id="s-elapsed">0</b>
         </div>
@@ -247,6 +297,7 @@
       lt: panel.querySelector("#s-lt"),
       mt: panel.querySelector("#s-mt"),
       match: panel.querySelector("#s-match"),
+      observed: panel.querySelector("#s-obs"),
       dom: panel.querySelector("#s-dom"),
       elapsed: panel.querySelector("#s-elapsed"),
       start: panel.querySelector("#pbx-start"),
@@ -282,8 +333,10 @@
     if (stats.running) return;
     stats.running = true;
     stats.startedAt = performance.now();
-    els.start.disabled = true;
-    els.stop.disabled = false;
+    ticks = 0;
+    setWorkloadState("running");
+    if (els.start) els.start.disabled = true;
+    if (els.stop) els.stop.disabled = false;
     page.start && page.start(page.root, page.params);
   }
 
@@ -295,8 +348,21 @@
     timers.clear();
     rafs.forEach((id) => cancelAnimationFrame(id));
     rafs.clear();
-    els.start.disabled = false;
-    els.stop.disabled = true;
+    if (els.start) els.start.disabled = false;
+    if (els.stop) els.stop.disabled = true;
+  }
+
+  // Bounded runs: when cycles=N is set, stop after N workload ticks and emit the done signal. The
+  // setTimeout(0) lets the final tick's DOM mutations settle (and the watcher observe them) first.
+  function finishRun() {
+    if (!stats.running) return;
+    stopWorkload();
+    PBX.lastRun = runSnapshot();
+    setWorkloadState("done");
+    window.dispatchEvent(new CustomEvent("pbx:workload-done", { detail: PBX.lastRun }));
+  }
+  function countTick() {
+    if (CYCLES > 0 && stats.running && ++ticks >= CYCLES) setTimeout(finishRun, 0);
   }
 
   // ---- long-task observer (main-thread blocking) ----------------------------
@@ -328,6 +394,7 @@
         els.lt.className = stats.longTasks > 0 ? "bad" : "ok";
         els.mt.textContent = stats.maxTaskMs.toFixed(0);
         els.match.textContent = stats.matches.toLocaleString();
+        els.observed.textContent = observed.total.toLocaleString();
         stats.domNodes = els.root ? els.root.getElementsByTagName("*").length : 0;
         els.dom.textContent = stats.domNodes.toLocaleString();
         els.elapsed.textContent = stats.running ? ((now - stats.startedAt) / 1000).toFixed(0) : "0";
@@ -348,7 +415,10 @@
   const PBX = {
     /** Register an interval that Stop() will clear. */
     every(ms, fn) {
-      const id = setInterval(fn, ms);
+      const id = setInterval(() => {
+        fn();
+        countTick();
+      }, ms);
       timers.add(id);
       return id;
     },
@@ -356,7 +426,10 @@
      *  Preferred over raf() for stress workloads: deterministic and unaffected
      *  by frame-production throttling. */
     frame(fn) {
-      const id = setInterval(fn, 16);
+      const id = setInterval(() => {
+        fn();
+        countTick();
+      }, 16);
       timers.add(id);
       return id;
     },
@@ -365,6 +438,7 @@
       const tick = () => {
         if (!stats.running) return;
         fn();
+        countTick();
         const id = requestAnimationFrame(tick);
         rafs.add(id);
       };
@@ -372,10 +446,35 @@
       rafs.add(id);
     },
     stats,
+    observed,
+    /** Snapshot of the last bounded (cycles=N) run; null until one completes. */
+    lastRun: null,
+
+    /** Record an external observation (e.g. a real mod firing). `key` (a node's data-item/data-row)
+     *  lets a test verify per-element counts — i.e. that it fired exactly once per element. */
+    record(name, key) {
+      const n = name || "fired";
+      observed.total++;
+      observed.counts[n] = (observed.counts[n] || 0) + 1;
+      if (key != null) {
+        (observed.keys[n] = observed.keys[n] || {})[key] = (observed.keys[n][key] || 0) + 1;
+      }
+      if (els.observed) els.observed.textContent = observed.total.toLocaleString();
+      return observed.total;
+    },
+    /** Zero the observation counters (call between phases of a test). */
+    reset() {
+      observed.total = 0;
+      observed.counts = {};
+      observed.keys = {};
+      if (els.observed) els.observed.textContent = "0";
+    },
 
     /** Entry point each page calls exactly once. */
     page(def) {
       MODE = rawParam("harness") || "optimized";
+      PANEL = rawParam("panel") !== "0";
+      CYCLES = numParam("cycles", 0);
       const params = {};
       for (const t of def.tunables || []) {
         params[t.key] = t.options ? rawParam(t.key) || t.def : numParam(t.key, t.def);
@@ -384,18 +483,34 @@
 
       const boot = () => {
         activePage = def;
+        setWorkloadState("idle");
+        // Cross-world bridge: a real mod (isolated world) can't reach window.PBX directly, but it can
+        // dispatch a `pbx:record` DOM event on the matched element; record it with that node's key.
+        window.addEventListener(
+          "pbx:record",
+          (event) => {
+            const target = event.target;
+            const key =
+              target && target.getAttribute
+                ? target.getAttribute("data-item") || target.getAttribute("data-row")
+                : null;
+            PBX.record((event.detail && event.detail.name) || "fired", key);
+          },
+          true
+        );
+
         const root = document.createElement("div");
         root.id = "pbx-root";
         document.body.appendChild(root);
         def.root = root;
 
-        if (def.intro) {
+        if (PANEL && def.intro) {
           const intro = document.createElement("div");
           intro.id = "pbx-intro";
           intro.innerHTML = def.intro;
           document.body.insertBefore(intro, root);
         }
-        buildChrome(def);
+        if (PANEL) buildChrome(def);
         def.build && def.build(root, params);
         // Attach the real watcher against the initial DOM (measures attach cost).
         attachWatcher(def);

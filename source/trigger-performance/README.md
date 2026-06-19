@@ -7,6 +7,26 @@ which a customer reported made some pages crash.
 
 Build output goes to `public/trigger-performance/` and is served at `/trigger-performance/`.
 
+## Automated testing (driving the real extension)
+
+The harness panel runs the vendored watcher for manual comparison, but the same pages
+double as **clean DOM targets for E2E tests that drive the real extension**. Load a page
+with `?harness=off&panel=0` (no competing watcher, no fixed overlay) plus:
+
+- `autostart=1` — start the workload without clicking; `cycles=N` — stop after exactly
+  N workload ticks.
+- On completion the harness sets `<html data-pbx-workload="done">` (lifecycle
+  `idle → running → done`) and fires a `pbx:workload-done` event — await that instead of a
+  timeout.
+- Generated nodes carry a stable `data-item` / `data-row` identity.
+- A mod reports work — tallied on `window.PBX.observed` (`{ total, counts, keys }`) — either
+  from page-world JS via `window.PBX.record(name, key)`, or by dispatching a `pbx:record` DOM
+  event on the matched element (its `data-item`/`data-row` becomes the key).
+
+`attribute-dedup.html` is a perf-free correctness scenario for the #8313 dedup invariant: a
+single stable node whose attributes churn (never added/removed), so a correct button injects
+exactly one button and a correct trigger fires once.
+
 ## Build
 
 ```bash

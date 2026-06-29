@@ -33,6 +33,33 @@
     column-width: 300px;
 	}
 
+	/*
+		Quill (snow) and ProseMirror ship light-theme chrome — dark toolbar icons
+		and light borders that vanish against water.css's dark background, leaving
+		transparent toolbars and a half-light/half-dark ProseMirror. Give them a
+		light editor surface so they render as designed and read as editors, like
+		the TinyMCE/CKEditor demos above.
+	*/
+	.ql-toolbar.ql-snow,
+	.ql-container.ql-snow {
+		background: #fff;
+		border-color: #ccc;
+	}
+
+	.ql-editor {
+		color: #1a1a1a;
+	}
+
+	.ql-editor.ql-blank::before {
+		color: rgba(0, 0, 0, 0.6);
+	}
+
+	.prosemirror .ProseMirror {
+		background: #fff;
+		color: #1a1a1a;
+		border: 1px solid #ccc;
+	}
+
 </style>
 
 <body>

@@ -60,6 +60,35 @@
 		border: 1px solid #ccc;
 	}
 
+	/*
+		Tiptap, Slate, CodeMirror and Trix render onto a nested surface and ship
+		light-theme chrome, so — like Quill and ProseMirror above — give them a
+		light editor surface so they read against water.css's dark background.
+	*/
+	.tiptap-host .ProseMirror,
+	.slate [data-slate-editor],
+	.codemirror .cm-editor,
+	.trix trix-editor {
+		background: #fff;
+		color: #1a1a1a;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		padding: 10px;
+		min-height: 4em;
+	}
+
+	.trix trix-toolbar {
+		background: #fff;
+		color: #1a1a1a;
+		border: 1px solid #ccc;
+		border-bottom: none;
+		border-radius: 6px 6px 0 0;
+	}
+
+	.trix trix-toolbar + trix-editor {
+		border-radius: 0 0 6px 6px;
+	}
+
 </style>
 
 <body>
@@ -76,8 +105,15 @@
 	<p><label>input[type="tel"] <input type="tel"></label></p>
 	<p><label>input[type="number"] <input type="number"></label></p>
 	<p><label>input[type="search"] <input type="search"></label></p>
+	<p><label>input[type="url"] <input type="url"></label></p>
+	<p><label>input[type="color"] <input type="color"></label></p>
 	<p><label>input[type="date"] <input type="date"></label></p>
 	<p><label>input[type="datetime"] <input type="datetime"></label></p>
+	<p><label>input[type="datetime-local"] <input type="datetime-local"></label></p>
+	<p><label>input[type="time"] <input type="time"></label></p>
+	<p><label>input[type="month"] <input type="month"></label></p>
+	<p><label>input[type="week"] <input type="week"></label></p>
+	<p><label>input[type="file"] <input type="file"></label></p>
 	<p><label>input[type="checkbox"] <input type="checkbox"></label></p>
 	<p><label>input[type="radio"] <input name="radiostar" type="radio"></label> <input name="radiostar" type="radio"></label></p>
 	<p><label>input[type="hidden"] <input type="hidden"></label></p>
@@ -105,6 +141,54 @@
 			<textarea readonly>Lorem ipsum dolor sit amet consectetur adipisicing elit. Animi modi velit tempore, perferendis iusto omnis. Cum ut in quae, perferendis reprehenderit perspiciatis provident totam nesciunt possimus minus eligendi iste exercitationem!</textarea>
 		</label>
 	</p>
+
+	<h2>select</h2>
+	<form class="input">
+		<p>
+			<label>select<br>
+				<select>
+					<option value="">Choose…</option>
+					<option value="one">One</option>
+					<option value="two" selected>Two</option>
+					<option value="three">Three</option>
+				</select>
+			</label>
+		</p>
+		<p>
+			<label>select with optgroups<br>
+				<select>
+					<optgroup label="Fruit">
+						<option>Apple</option>
+						<option>Banana</option>
+					</optgroup>
+					<optgroup label="Vegetable">
+						<option>Carrot</option>
+						<option>Potato</option>
+					</optgroup>
+				</select>
+			</label>
+		</p>
+		<p>
+			<label>select[multiple]<br>
+				<select multiple size="4">
+					<option value="one">One</option>
+					<option value="two" selected>Two</option>
+					<option value="three" selected>Three</option>
+					<option value="four">Four</option>
+				</select>
+			</label>
+		</p>
+		<p>
+			<label>input + datalist<br>
+				<input list="datalist-options">
+				<datalist id="datalist-options">
+					<option value="Apple"></option>
+					<option value="Banana"></option>
+					<option value="Carrot"></option>
+				</datalist>
+			</label>
+		</p>
+	</form>
 
 	<h2><a id="contenteditable" href="#contenteditable">contentEditable</a></h2>
 	<p>
@@ -214,6 +298,136 @@
 				plugins: exampleSetup({ schema }),
 			}),
 		});
+	</script>
+
+	<h2><a id="lexical" href="#lexical">Lexical</a> (<a href="https://lexical.dev/">Docs</a>)</h2>
+	<div class="lexical" contenteditable></div>
+	<script type="module">
+		// Lexical is split across packages (@lexical/rich-text, -history) that all
+		// import the core `lexical` module. Loading each from esm.sh with the same
+		// pinned version keeps them resolving to a single shared instance.
+		import { createEditor, $getRoot, $createParagraphNode, $createTextNode } from "https://esm.sh/lexical@0.21.0";
+		import { registerRichText, HeadingNode, QuoteNode } from "https://esm.sh/@lexical/rich-text@0.21.0";
+		import { registerHistory, createEmptyHistoryState } from "https://esm.sh/@lexical/history@0.21.0";
+
+		const editor = createEditor({
+			namespace: 'playground',
+			nodes: [HeadingNode, QuoteNode],
+			onError: (error) => console.error(error),
+		});
+		editor.setRootElement(document.querySelector('.lexical'));
+		registerRichText(editor);
+		registerHistory(editor, createEmptyHistoryState(), 1000);
+		editor.update(() => {
+			const root = $getRoot();
+			if (root.getFirstChild() === null) {
+				const paragraph = $createParagraphNode();
+				paragraph.append($createTextNode('This is an editor'));
+				root.append(paragraph);
+			}
+		});
+	</script>
+
+	<h2><a id="tiptap" href="#tiptap">Tiptap</a> (<a href="https://tiptap.dev/docs">Docs</a>)</h2>
+	<div class="tiptap-host"></div>
+	<script type="module">
+		import { Editor } from "https://esm.sh/@tiptap/core@2.11.5";
+		import StarterKit from "https://esm.sh/@tiptap/starter-kit@2.11.5";
+		new Editor({
+			element: document.querySelector('.tiptap-host'),
+			extensions: [StarterKit],
+			content: '<p>This is an editor</p>',
+		});
+	</script>
+
+	<h2><a id="slate" href="#slate">Slate</a> (<a href="https://docs.slatejs.org/">Docs</a>)</h2>
+	<div class="slate"></div>
+	<script type="module">
+		import React, { useState } from "https://esm.sh/react@18.3.1";
+		import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+		import { createEditor } from "https://esm.sh/slate@0.103.0";
+		import { Slate, Editable, withReact } from "https://esm.sh/slate-react@0.110.3?deps=react@18.3.1,react-dom@18.3.1,slate@0.103.0";
+
+		const h = React.createElement;
+		const initialValue = [{ type: 'paragraph', children: [{ text: 'This is an editor' }] }];
+
+		function App() {
+			const [editor] = useState(() => withReact(createEditor()));
+			return h(Slate, { editor, initialValue }, h(Editable));
+		}
+
+		createRoot(document.querySelector('.slate')).render(h(App));
+	</script>
+
+	<h2><a id="codemirror" href="#codemirror">CodeMirror 6</a> (<a href="https://codemirror.net/">Docs</a>)</h2>
+	<div class="codemirror"></div>
+	<script type="module">
+		// The `codemirror` meta-package and the language package both depend on
+		// @codemirror/state; esm.sh resolves them to one pinned version so the
+		// editor doesn't throw "Unrecognized extension value" from a split instance.
+		import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
+		import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
+		new EditorView({
+			doc: "function hello() {\n  return 'This is an editor';\n}\n",
+			extensions: [basicSetup, javascript()],
+			parent: document.querySelector('.codemirror'),
+		});
+	</script>
+
+	<h2><a id="trix" href="#trix">Trix</a> (<a href="https://trix-editor.org/">Docs</a>)</h2>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/trix@2.1.15/dist/trix.css">
+	<script src="https://cdn.jsdelivr.net/npm/trix@2.1.15/dist/trix.umd.min.js"></script>
+	<div class="trix">
+		<input id="trix-input" type="hidden" value="&lt;div&gt;This is an editor&lt;/div&gt;">
+		<trix-editor input="trix-input"></trix-editor>
+	</div>
+
+	<h2><a id="react-controlled" href="#react-controlled">React controlled input</a> (<a href="https://react.dev/reference/react-dom/components/input#controlling-an-input-with-a-state-variable">Docs</a>)</h2>
+	<p>Value lives in React state, so assigning <code>.value</code> directly is ignored — you must use the native value setter and dispatch an <code>input</code> event.</p>
+	<div class="react-controlled"></div>
+	<script type="module">
+		import React, { useState } from "https://esm.sh/react@18.3.1";
+		import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+
+		const h = React.createElement;
+		function ControlledFields() {
+			const [text, setText] = useState('React controlled');
+			const [area, setArea] = useState('React controlled textarea');
+			return h('form', { className: 'input' },
+				h('p', null, h('label', null, 'controlled input ',
+					h('input', { value: text, onChange: (event) => setText(event.target.value) }))),
+				h('p', null, h('label', null, 'controlled textarea ',
+					h('textarea', { value: area, onChange: (event) => setArea(event.target.value) }))),
+			);
+		}
+		createRoot(document.querySelector('.react-controlled')).render(h(ControlledFields));
+	</script>
+
+	<h2><a id="shadow-dom" href="#shadow-dom">Shadow DOM</a> (<a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM">Docs</a>)</h2>
+	<p>Fields inside shadow roots are encapsulated — light-DOM selectors and styles can't reach them.</p>
+	<div class="shadow-host-open"></div>
+	<div class="shadow-host-closed"></div>
+	<script>
+		const shadowFieldStyles = `
+			:host { display: block; margin-bottom: 12px; }
+			label { display: block; margin-bottom: 8px; }
+			[contenteditable] {
+				background: #fff; color: #1a1a1a; border: 1px solid #ccc;
+				border-radius: 6px; padding: 10px; min-height: 3em;
+			}
+		`;
+		const openRoot = document.querySelector('.shadow-host-open').attachShadow({ mode: 'open' });
+		openRoot.innerHTML = `
+			<style>${shadowFieldStyles}</style>
+			<label>open shadow input <input type="text"></label>
+			<label>open shadow textarea <textarea></textarea></label>
+			<label>open shadow contentEditable <div contenteditable>This is an editor</div></label>
+		`;
+		const closedRoot = document.querySelector('.shadow-host-closed').attachShadow({ mode: 'closed' });
+		closedRoot.innerHTML = `
+			<style>${shadowFieldStyles}</style>
+			<label>closed shadow input <input type="text"></label>
+		`;
 	</script>
 
 	<h2>iframed page</h2>

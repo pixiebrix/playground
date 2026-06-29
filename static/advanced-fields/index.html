@@ -147,6 +147,35 @@
 		new quill2('.quill2', {theme: 'snow'});
 	</script>
 
+	<h2><a id="prosemirror" href="#prosemirror">ProseMirror</a> (<a href="https://prosemirror.net/">Docs</a>)</h2>
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prosemirror-view@1.41.9/style/prosemirror.css">
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prosemirror-menu@1.3.2/style/menu.css">
+	<div class="prosemirror-content" style="display: none">
+		<p>This is an editor</p>
+	</div>
+	<div class="prosemirror"></div>
+	<script type="module">
+		// ProseMirror is split across many packages that each depend on the core
+		// modules. Pin the shared deps so esm.sh resolves a single instance of
+		// each, otherwise the editor throws "Adding different instances of a keyed plugin".
+		const deps = 'prosemirror-model@1.25.9,prosemirror-state@1.4.4,prosemirror-transform@1.12.0,prosemirror-view@1.41.9';
+		const [{ EditorState }, { EditorView }, { DOMParser }, { schema }, { exampleSetup }] = await Promise.all([
+			import(`https://esm.sh/prosemirror-state@1.4.4?deps=${deps}`),
+			import(`https://esm.sh/prosemirror-view@1.41.9?deps=${deps}`),
+			import(`https://esm.sh/prosemirror-model@1.25.9?deps=${deps}`),
+			import(`https://esm.sh/prosemirror-schema-basic@1.2.4?deps=${deps}`),
+			import(`https://esm.sh/prosemirror-example-setup@1.2.3?deps=${deps}`),
+		]);
+
+		const content = document.querySelector('.prosemirror-content');
+		new EditorView(document.querySelector('.prosemirror'), {
+			state: EditorState.create({
+				doc: DOMParser.fromSchema(schema).parse(content),
+				plugins: exampleSetup({ schema }),
+			}),
+		});
+	</script>
+
 	<h2>iframed page</h2>
 	<p>
 		🎯 Visit the <a href="./frame.html">framed version</a>

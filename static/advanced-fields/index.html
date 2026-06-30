@@ -303,104 +303,138 @@
 	<h2><a id="lexical" href="#lexical">Lexical</a> (<a href="https://lexical.dev/">Docs</a>)</h2>
 	<div class="lexical" contenteditable></div>
 	<script type="module">
+		// Loaded via dynamic import() rather than top-level static imports so these
+		// remote esm.sh modules do NOT block the page's `load` event. The
+		// advanced-fields e2e specs navigate with Playwright's default
+		// waitUntil:"load"; statically importing ~30 CDN modules across the editors
+		// below pushed `load` past the 10s navigation timeout. Deferring the editors
+		// added in playground#75 restores the pre-#75 load timing. The pre-#75
+		// editors the e2e suite exercises (DraftJS/TinyMCE/CKEditor/Quill) stay
+		// synchronous so they remain ready by `load`. See pixiebrix/pixiebrix-source#8620.
+		//
 		// Lexical is split across packages (@lexical/rich-text, -history) that all
 		// import the core `lexical` module. Loading each from esm.sh with the same
 		// pinned version keeps them resolving to a single shared instance.
-		import { createEditor, $getRoot, $createParagraphNode, $createTextNode } from "https://esm.sh/lexical@0.21.0";
-		import { registerRichText, HeadingNode, QuoteNode } from "https://esm.sh/@lexical/rich-text@0.21.0";
-		import { registerHistory, createEmptyHistoryState } from "https://esm.sh/@lexical/history@0.21.0";
+		void (async () => {
+			const { createEditor, $getRoot, $createParagraphNode, $createTextNode } = await import("https://esm.sh/lexical@0.21.0");
+			const { registerRichText, HeadingNode, QuoteNode } = await import("https://esm.sh/@lexical/rich-text@0.21.0");
+			const { registerHistory, createEmptyHistoryState } = await import("https://esm.sh/@lexical/history@0.21.0");
 
-		const editor = createEditor({
-			namespace: 'playground',
-			nodes: [HeadingNode, QuoteNode],
-			onError: (error) => console.error(error),
-		});
-		editor.setRootElement(document.querySelector('.lexical'));
-		registerRichText(editor);
-		registerHistory(editor, createEmptyHistoryState(), 1000);
-		editor.update(() => {
-			const root = $getRoot();
-			if (root.getFirstChild() === null) {
-				const paragraph = $createParagraphNode();
-				paragraph.append($createTextNode('This is an editor'));
-				root.append(paragraph);
-			}
-		});
+			const editor = createEditor({
+				namespace: 'playground',
+				nodes: [HeadingNode, QuoteNode],
+				onError: (error) => console.error(error),
+			});
+			editor.setRootElement(document.querySelector('.lexical'));
+			registerRichText(editor);
+			registerHistory(editor, createEmptyHistoryState(), 1000);
+			editor.update(() => {
+				const root = $getRoot();
+				if (root.getFirstChild() === null) {
+					const paragraph = $createParagraphNode();
+					paragraph.append($createTextNode('This is an editor'));
+					root.append(paragraph);
+				}
+			});
+		})();
 	</script>
 
 	<h2><a id="tiptap" href="#tiptap">Tiptap</a> (<a href="https://tiptap.dev/docs">Docs</a>)</h2>
 	<div class="tiptap-host"></div>
 	<script type="module">
-		import { Editor } from "https://esm.sh/@tiptap/core@2.11.5";
-		import StarterKit from "https://esm.sh/@tiptap/starter-kit@2.11.5";
-		new Editor({
-			element: document.querySelector('.tiptap-host'),
-			extensions: [StarterKit],
-			content: '<p>This is an editor</p>',
-		});
+		// Lazy-loaded — see the Lexical block above (pixiebrix/pixiebrix-source#8620).
+		void (async () => {
+			const { Editor } = await import("https://esm.sh/@tiptap/core@2.11.5");
+			const { default: StarterKit } = await import("https://esm.sh/@tiptap/starter-kit@2.11.5");
+			new Editor({
+				element: document.querySelector('.tiptap-host'),
+				extensions: [StarterKit],
+				content: '<p>This is an editor</p>',
+			});
+		})();
 	</script>
 
 	<h2><a id="slate" href="#slate">Slate</a> (<a href="https://docs.slatejs.org/">Docs</a>)</h2>
 	<div class="slate"></div>
 	<script type="module">
-		import React, { useState } from "https://esm.sh/react@18.3.1";
-		import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
-		import { createEditor } from "https://esm.sh/slate@0.103.0";
-		import { Slate, Editable, withReact } from "https://esm.sh/slate-react@0.110.3?deps=react@18.3.1,react-dom@18.3.1,slate@0.103.0";
+		// Lazy-loaded — see the Lexical block above (pixiebrix/pixiebrix-source#8620).
+		void (async () => {
+			const { default: React, useState } = await import("https://esm.sh/react@18.3.1");
+			const { createRoot } = await import("https://esm.sh/react-dom@18.3.1/client");
+			const { createEditor } = await import("https://esm.sh/slate@0.103.0");
+			const { Slate, Editable, withReact } = await import("https://esm.sh/slate-react@0.110.3?deps=react@18.3.1,react-dom@18.3.1,slate@0.103.0");
 
-		const h = React.createElement;
-		const initialValue = [{ type: 'paragraph', children: [{ text: 'This is an editor' }] }];
+			const h = React.createElement;
+			const initialValue = [{ type: 'paragraph', children: [{ text: 'This is an editor' }] }];
 
-		function App() {
-			const [editor] = useState(() => withReact(createEditor()));
-			return h(Slate, { editor, initialValue }, h(Editable));
-		}
+			function App() {
+				const [editor] = useState(() => withReact(createEditor()));
+				return h(Slate, { editor, initialValue }, h(Editable));
+			}
 
-		createRoot(document.querySelector('.slate')).render(h(App));
+			createRoot(document.querySelector('.slate')).render(h(App));
+		})();
 	</script>
 
 	<h2><a id="codemirror" href="#codemirror">CodeMirror 6</a> (<a href="https://codemirror.net/">Docs</a>)</h2>
 	<div class="codemirror"></div>
 	<script type="module">
+		// Lazy-loaded — see the Lexical block above (pixiebrix/pixiebrix-source#8620).
+		//
 		// The `codemirror` meta-package and the language package both depend on
 		// @codemirror/state; esm.sh resolves them to one pinned version so the
 		// editor doesn't throw "Unrecognized extension value" from a split instance.
-		import { EditorView, basicSetup } from "https://esm.sh/codemirror@6.0.1";
-		import { javascript } from "https://esm.sh/@codemirror/lang-javascript@6.2.2";
-		new EditorView({
-			doc: "function hello() {\n  return 'This is an editor';\n}\n",
-			extensions: [basicSetup, javascript()],
-			parent: document.querySelector('.codemirror'),
-		});
+		void (async () => {
+			const { EditorView, basicSetup } = await import("https://esm.sh/codemirror@6.0.1");
+			const { javascript } = await import("https://esm.sh/@codemirror/lang-javascript@6.2.2");
+			new EditorView({
+				doc: "function hello() {\n  return 'This is an editor';\n}\n",
+				extensions: [basicSetup, javascript()],
+				parent: document.querySelector('.codemirror'),
+			});
+		})();
 	</script>
 
 	<h2><a id="trix" href="#trix">Trix</a> (<a href="https://trix-editor.org/">Docs</a>)</h2>
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/trix@2.1.15/dist/trix.css">
-	<script src="https://cdn.jsdelivr.net/npm/trix@2.1.15/dist/trix.umd.min.js"></script>
 	<div class="trix">
 		<input id="trix-input" type="hidden" value="&lt;div&gt;This is an editor&lt;/div&gt;">
 		<trix-editor input="trix-input"></trix-editor>
 	</div>
+	<script>
+		// Trix ships as a classic (non-module) UMD bundle, so it can't be loaded
+		// with import(). Inject it after the page 'load' event so its <trix-editor>
+		// custom element upgrades without the parser-blocking <script src> delaying
+		// `load`. See pixiebrix/pixiebrix-source#8620.
+		addEventListener("load", () => {
+			const script = document.createElement("script");
+			script.src = "https://cdn.jsdelivr.net/npm/trix@2.1.15/dist/trix.umd.min.js";
+			document.head.append(script);
+		});
+	</script>
 
 	<h2><a id="react-controlled" href="#react-controlled">React controlled input</a> (<a href="https://react.dev/reference/react-dom/components/input#controlling-an-input-with-a-state-variable">Docs</a>)</h2>
 	<p>Value lives in React state, so assigning <code>.value</code> directly is ignored — you must use the native value setter and dispatch an <code>input</code> event.</p>
 	<div class="react-controlled"></div>
 	<script type="module">
-		import React, { useState } from "https://esm.sh/react@18.3.1";
-		import { createRoot } from "https://esm.sh/react-dom@18.3.1/client";
+		// Lazy-loaded — see the Lexical block above (pixiebrix/pixiebrix-source#8620).
+		void (async () => {
+			const { default: React, useState } = await import("https://esm.sh/react@18.3.1");
+			const { createRoot } = await import("https://esm.sh/react-dom@18.3.1/client");
 
-		const h = React.createElement;
-		function ControlledFields() {
-			const [text, setText] = useState('React controlled');
-			const [area, setArea] = useState('React controlled textarea');
-			return h('form', { className: 'input' },
-				h('p', null, h('label', null, 'controlled input ',
-					h('input', { value: text, onChange: (event) => setText(event.target.value) }))),
-				h('p', null, h('label', null, 'controlled textarea ',
-					h('textarea', { value: area, onChange: (event) => setArea(event.target.value) }))),
-			);
-		}
-		createRoot(document.querySelector('.react-controlled')).render(h(ControlledFields));
+			const h = React.createElement;
+			function ControlledFields() {
+				const [text, setText] = useState('React controlled');
+				const [area, setArea] = useState('React controlled textarea');
+				return h('form', { className: 'input' },
+					h('p', null, h('label', null, 'controlled input ',
+						h('input', { value: text, onChange: (event) => setText(event.target.value) }))),
+					h('p', null, h('label', null, 'controlled textarea ',
+						h('textarea', { value: area, onChange: (event) => setArea(event.target.value) }))),
+				);
+			}
+			createRoot(document.querySelector('.react-controlled')).render(h(ControlledFields));
+		})();
 	</script>
 
 	<h2><a id="shadow-dom" href="#shadow-dom">Shadow DOM</a> (<a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_components/Using_shadow_DOM">Docs</a>)</h2>

@@ -1,0 +1,12 @@
+{
+  "name": "pixiebrix-playground",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Static playground sites for PixieBrix, deployed on Vercel",
+  "scripts": {
+    "build": "bash build.sh"
+  },
+  "engines": {
+    "node": "24.x"
+  }
+}

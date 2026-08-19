@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+<title>Salesforce-style CKEditor4 email composer</title>
+<style>
+	iframe {
+		width: 100%;
+		height: 50vh;
+		border: 1px solid #ccc;
+	}
+</style>
+<h1>Salesforce-style CKEditor4 email composer</h1>
+<p>
+	Reproduces the frame split of the Salesforce Classic email composer for
+	<a href="https://github.com/pixiebrix/pixiebrix-source/issues/10379">issue #10379</a>
+	Phase 2: the CKEditor 4 editable body is a nested <code>about:blank</code> frame inside
+	an <code>/email/htmlbody</code> iframe, while the <b>Send</b> button is here in the top
+	frame. No single frame owns both the editor and the button, so a same-frame guard can't
+	block the send — the extension mirrors the body's verdict up and blocks at this button.
+	🔙 Visit <a href="./">Advanced fields</a>.
+</p>
+<!--
+	The editor body is two frames down; its parent frame's path (/email/htmlbody) is the
+	signature the extension keys on (isCkEditor4EditorEmailContentFrame). Absolute src so
+	the pathname is exactly /email/htmlbody/, matching Salesforce.
+-->
+<iframe src="/email/htmlbody/" title="Email body" frameborder="0"></iframe>
+<p>
+	<button type="button" aria-label="Send" id="send-email">Send</button>
+	<output id="send-status"></output>
+</p>
+<script>
+	// A page-level send handler so a real (unblocked) send is observable: on click it
+	// marks "sent". The extension's cross-frame guard is capture-phase, so a blocked send
+	// stops propagation before this bubble-phase handler runs and "sent" never appears.
+	document.getElementById("send-email").addEventListener("click", () => {
+		document.getElementById("send-status").textContent = "sent";
+	});
+</script>

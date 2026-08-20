@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+<title>Custom send button composer</title>
+<h1>Custom send button composer</h1>
+<p>
+	A same-frame composer whose send control is a custom button the extension's
+	built-in send-button selectors deliberately do <b>not</b> match: no
+	<code>aria-label</code> of "Send"/"Submit" and no
+	<code>data-testid="send-button"</code>, just an app-specific id and label. It
+	exercises the per-rule <code>submitSelectors</code> escape hatch for
+	<a href="https://github.com/pixiebrix/pixiebrix-source/issues/10415">issue #10415</a>:
+	a policy that names <code>#custom-send</code> blocks the send here, while a
+	policy without it leaves this button unguarded (the built-in selectors miss it).
+	🔙 Visit <a href="./">Advanced fields</a>.
+</p>
+<div id="composer">
+	<p><label>prompt <textarea id="custom-prompt" aria-label="custom prompt"></textarea></label></p>
+	<p>
+		<button type="button" id="custom-send" class="app-send-control">Deliver</button>
+		<output id="send-status"></output>
+	</p>
+</div>
+<script>
+	// A page-level send handler so a real (unblocked) send is observable: on click it
+	// marks "sent". The extension's submit guard is capture-phase, so a blocked send
+	// stops propagation before this bubble-phase handler runs and "sent" never appears.
+	document.getElementById("custom-send").addEventListener("click", () => {
+		document.getElementById("send-status").textContent = "sent";
+	});
+</script>

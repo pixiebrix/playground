@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<title>Email HTML body (CKEditor 4)</title>
+<style>
+	body {
+		margin: 0;
+	}
+</style>
+<!--
+	Frame 2 of the Salesforce email topology: this document loads ckeditor.js, so
+	CKEDITOR.instances live here. CKEditor 4 replaces the textarea with its own nested
+	about:blank editing frame (frame 3), whose parent path (this page, /email/htmlbody/)
+	is what the extension detects as the Salesforce email body.
+-->
+<textarea name="email-htmlbody"></textarea>
+<script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
+<script>
+	CKEDITOR.disableAutoInline = true;
+	CKEDITOR.replace("email-htmlbody");
+</script>

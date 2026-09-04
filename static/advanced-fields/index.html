@@ -29,6 +29,11 @@
 		margin-top: 100px;
 	}
 
+	/* The sub-page nav sits directly under the h1, so it skips the 100px section gap above. */
+	.subpages h2 {
+		margin-top: 0;
+	}
+
 	.input {
     column-width: 300px;
 	}
@@ -94,6 +99,16 @@
 
 <body>
 	<h1>Advanced fields playground</h1>
+
+	<nav class="subpages">
+		<h2>Other pages</h2>
+		<ul>
+			<li><a href="./atlaskit.html">Atlassian (Atlaskit) editor</a></li>
+			<li><a href="./salesforce-email.html">Salesforce-style CKEditor4 email composer</a></li>
+			<li><a href="./custom-send.html">Custom send button composer</a></li>
+			<li><a href="./frame.html">This page in a frame</a></li>
+		</ul>
+	</nav>
 
 	<h2>input</h2>
 <form class="input">

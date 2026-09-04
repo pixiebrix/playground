@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<meta charset="utf-8" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/water.css">
+<title>Atlassian (Atlaskit) editor</title>
+<style>
+	/*
+		Atlaskit ships light-theme chrome, so — like the Quill and ProseMirror fixtures on the
+		main page — give it a light editor surface to read against water.css's dark background.
+	*/
+	.atlaskit {
+		background: #fff;
+		color: #1a1a1a;
+		border: 1px solid #ccc;
+		border-radius: 6px;
+		padding: 10px;
+		min-height: 4em;
+	}
+</style>
+<h1>Atlassian (Atlaskit) editor</h1>
+<p>
+	<a href="https://atlaskit.atlassian.com/packages/editor/editor-core">@atlaskit/editor-core</a>,
+	the ProseMirror-based editor behind Jira comments and Confluence pages, in its
+	<code>comment</code> appearance. It exposes the same <code>#ak-editor-textarea</code>
+	contenteditable and <code>akEditor</code> class a real Jira or Confluence page does, for
+	<a href="https://github.com/pixiebrix/pixiebrix-source/issues/10768">issue #10768</a>.
+	🔙 Visit <a href="./">Advanced fields</a>.
+</p>
+<p>
+	It gets its own page rather than a section on <a href="./">Advanced fields</a> because the
+	editor can't be loaded from a CDN and bundles to 5.5MB — an order of magnitude heavier than
+	anything else there, on the page whose load time already broke the e2e suite once.
+</p>
+<div class="atlaskit">Loading…</div>
+<script type="module">
+	// Both the bundle and its stylesheet load after `load` fires: a stylesheet inserted before
+	// then delays the event, which is what timed out the e2e suite in pixiebrix-source#8620.
+	addEventListener("load", async () => {
+		const stylesheet = document.createElement("link");
+		stylesheet.rel = "stylesheet";
+		stylesheet.href = "/atlaskit-editor/atlaskit-editor.css";
+		document.head.append(stylesheet);
+
+		const { mount } = await import("/atlaskit-editor/atlaskit-editor.js");
+		const host = document.querySelector(".atlaskit");
+		host.textContent = "";
+		mount(host);
+	});
+</script>

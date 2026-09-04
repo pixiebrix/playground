@@ -30,19 +30,29 @@
 	editor can't be loaded from a CDN and bundles to 5.5MB — an order of magnitude heavier than
 	anything else there, on the page whose load time already broke the e2e suite once.
 </p>
+<p>
+	The preset omits tables, media, emoji, mentions and link cards, so pasting one of those
+	drops it here but not in real Jira. Restoring them triples the bundle.
+</p>
 <div class="atlaskit">Loading…</div>
 <script type="module">
-	// Both the bundle and its stylesheet load after `load` fires: a stylesheet inserted before
-	// then delays the event, which is what timed out the e2e suite in pixiebrix-source#8620.
+	// Inside `load` so neither half delays the event — blocking module imports are what timed
+	// out the e2e suite in pixiebrix-source#8620, and a stylesheet added earlier delays it too.
 	addEventListener("load", async () => {
 		const stylesheet = document.createElement("link");
 		stylesheet.rel = "stylesheet";
 		stylesheet.href = "/atlaskit-editor/atlaskit-editor.css";
 		document.head.append(stylesheet);
 
-		const { mount } = await import("/atlaskit-editor/atlaskit-editor.js");
 		const host = document.querySelector(".atlaskit");
-		host.textContent = "";
-		mount(host);
+		try {
+			const { mount } = await import("/atlaskit-editor/atlaskit-editor.js");
+			host.textContent = "";
+			mount(host);
+		} catch (error) {
+			// A stuck "Loading…" and a 404 look identical in a CI screenshot
+			console.error(error);
+			host.textContent = String(error);
+		}
 	});
 </script>

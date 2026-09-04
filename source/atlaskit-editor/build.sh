@@ -32,3 +32,6 @@ npx esbuild entry.js \
 	--loader:.svg=dataurl \
 	--loader:.png=dataurl \
 	--outfile="$PROJECT_DIST/atlaskit-editor.js"
+
+# esbuild emits this stylesheet implicitly, so a version that dropped it would 404 at runtime
+test -s "$PROJECT_DIST/atlaskit-editor.css" || { echo "esbuild emitted no stylesheet" >&2; exit 1; }
